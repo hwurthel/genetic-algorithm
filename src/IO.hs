@@ -1,10 +1,11 @@
 -- Модуль взаимодействия программы
 -- с внешними программами
 module IO where
-
+    
 import System.IO
-import System.Directory
+import System.Directory   (removeFile, doesFileExist)
 import Control.Concurrent (threadDelay)
+
 import Protein
 
 outFileName = "output"
@@ -23,7 +24,7 @@ computeLambda p = do
     removeFile inFileName
     return res
     where 
-        update p x = p { lambda = x }
+        update p x = p { lambda = Just x }
         wait False f = f
         wait True  f = do
             e <- doesFileExist inFileName 

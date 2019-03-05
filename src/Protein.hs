@@ -1,12 +1,14 @@
 -- Модуль содержит описание структуры Protein
 module Protein where
 
+import System.Random (randomRIO)
+
 type Aminoacid = Char
 
 -- Структура белка
 data Protein = Protein { protein   :: [Aminoacid]
                        , variance  :: [Aminoacid]
-                       , lambda    :: Double
+                       , lambda    :: Maybe Double
                        } 
 
 -- Полагаем, что белок является "лучше", если
@@ -26,16 +28,17 @@ instance Show Protein where
 tmpProtein :: Protein
 tmpProtein = Protein { 
     variance = [],
-    protein  = "MLMTVFSSAPELALLGSTFAQVDpop_sizeNLSVSDSLTYGQFNLVYNA" <>
+    protein  = "MLMTVFSSAPELALLGSTFAQVDPSNLSVSDSLTYGQFNLVYNA" <>
                "FSFAIAAMFASALFFFSAQALVGQRYRLALLVSAIVVSIAGYHY" <>
                "FRIFNSWDAAYVLENGVYSLTSEKFNDAYRYVDWLLTVPLLLVE" <>
                "TVAVLTLPAKEARPLLIKLTVASVLMIATGYPGEISDDITTRII" <>
                "WGTVSTIPFAYILYVLWVELSRSLVRQPAAVQTLVRNMRWLLLL" <>
                "SWGVYPIAYLLPMLGVSGTSAAVGVQVGYTIADVLAKPVFGLLV" <>
                "FAIALVKTKADQESSEPHAAIGAAANKSGGSLIS",
-    lambda   = 750
+    lambda   = Just 750
     }
 
+    
 -- Пары, определяющие, в каком месте белка и на какую аминокислоту
 -- мы можем произвести замену
 bros :: [([Aminoacid], Int)]
@@ -48,9 +51,17 @@ bros = [("DAPQGSKTLVNWM", 121),
         ("DET"          , 253),
         ("AM"           , 256)]
 
+bros_var = fst . unzip $ bros
+bros_pos = snd . unzip $ bros
 
 -- Вставка изменяемых аминокислот в шаблонный белок
 -- с целью получить вид полученного белка  
 insertVariance :: [(Aminoacid, Int)] -> [Aminoacid]
 insertVariance x = foldl insert (protein tmpProtein) x
     where insert p (a, n) = take (n-1) p <> [a] <> drop n p
+
+-- Взятие случайной аминокислоты из набора доступных
+selectAminoacid :: [Aminoacid] -> IO Aminoacid
+selectAminoacid x = do
+    r <- randomRIO (0, length x - 1)
+    return $ x !! r
