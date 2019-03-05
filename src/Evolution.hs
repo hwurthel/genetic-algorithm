@@ -1,4 +1,3 @@
--- Модуль содержит реализацию процессов эволюции
 module Evolution where
 
 import System.Random (randomRIO)
@@ -6,7 +5,7 @@ import Data.List     (sortOn)
 import Protein
 
 a         = 0.05  -- Параметр для функции оценки
-pop_size  = 100   -- Размер популяции
+pop_size  = 100    -- Размер популяции
 prob_cros = 0.3   -- Вероятность кроссинговера
 prob_mut  = 0.2   -- Вероятность мутации
 
