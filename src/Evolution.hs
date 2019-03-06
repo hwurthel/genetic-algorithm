@@ -43,8 +43,8 @@ crossingover' :: (Protein, Protein) -> IO (Protein, Protein)
 crossingover' (p1, p2) = do
      let (v1, v2 ) = (variance p1, variance p2)
      (v1', v2') <- crossingover'' (v1, v2) 0
-     let p1' = p1 {variance = v1', protein = insertVariance $ zip v1' bros_pos, lambda = Nothing }
-         p2' = p2 {variance = v2', protein = insertVariance $ zip v2' bros_pos, lambda = Nothing }
+     let p1' = Protein {variance = v1', protein = insertVariance $ zip v1' bros_pos, lambda = Nothing }
+         p2' = Protein {variance = v2', protein = insertVariance $ zip v2' bros_pos, lambda = Nothing }
      return (p1', p2')
 
 -- Кроссинговер между парой особей. Вспомогательная функция
@@ -78,16 +78,16 @@ revMakeParentsPair ((x:xs), y) = ([fst x], []) <> ([snd x], []) <> revMakeParent
 -- вероятностью 0.3.
 mutation :: [Protein] -> IO [Protein]
 mutation ps = do
-    (ps'_f, ps'_s)   <- selectProtein prob_mut ps
-    ps'_mut <- sequence $ map mutation' ps'_f
+    (ps'_f, ps'_s) <- selectProtein prob_mut ps
+    ps'_mut        <- sequence $ map mutation' ps'_f
     return (ps'_mut <> ps'_s) 
 
 mutation' :: Protein -> IO Protein
 mutation' p = do
     let v = variance p
     v' <- mutation'' v 0
-    let p' = p {variance = v', protein = insertVariance $ zip v' bros_pos, lambda = Nothing }
-    return p
+    let p' = Protein {variance = v', protein = insertVariance $ zip v' bros_pos, lambda = Nothing }
+    return p'
 
 mutation'' :: [Aminoacid] -> Int -> IO [Aminoacid]
 mutation'' p _ = return p
