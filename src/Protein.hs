@@ -20,9 +20,9 @@ instance Ord Protein where
     compare a b = compare (lambda a) (lambda b)
 
 instance Show Protein where
-    show p = "\nLambda:\t" <> (show $ lambda p) <>
-             "\nVariance:\t" <> (variance p) <>
-             "\nProtein:\t" <> (protein p)
+    show p = --"\nLambda:\t" <> (show $ lambda p)-- <>
+             "\nVariance:\t" <> (variance p)-- <>
+             --"\nProtein:\t" <> (protein p)
 
 -- Шаблонный белок
 tmpProtein :: Protein
