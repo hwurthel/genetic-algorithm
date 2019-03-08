@@ -23,9 +23,9 @@ generatePopulation =
 -- Инициализатор особи
 generateProtein :: IO Protein
 generateProtein = do
-    m' <- sequence $ fmap selectAminoacid bros_var
-    return $ Protein { variance = m', 
-                       protein  = insertVariance $ zip m' bros_pos, 
+    v <- sequence $ fmap selectAminoacid bros_var
+    return $ Protein { variance = v, 
+                       protein  = insertVariance $ zip v bros_pos, 
                        lambda   = Nothing}
 -- КОНЕЦ. ГЕНЕРАЦИЯ ПОПУЛЯЦИИ
 
@@ -82,14 +82,16 @@ mutation ps = do
 
 mutation' :: Protein -> IO Protein
 mutation' p = do
-    let v = variance p
-    v' <- mutation'' v 0
+    let v = zip (variance p) bros_var
+    v' <- sequence $ map (uncurry mutation'') v
     let p' = Protein {variance = v', protein = insertVariance $ zip v' bros_pos, lambda = Nothing }
     return p'
 
-mutation'' :: [Aminoacid] -> Int -> IO [Aminoacid]
-mutation'' p _ = return p
-
+mutation'' :: Aminoacid -> [Aminoacid] -> IO Aminoacid
+mutation'' a as = do
+    r <- randomRIO (0, 1 :: Double)
+    if r > prob_mut_gene then return a
+    else selectAminoacid (delete a as) 
 -- КОНЕЦ. МУТАЦИИ 
 
 -- НАЧАЛО. СЕЛЕКЦИЯ
@@ -118,9 +120,9 @@ sortPopulation p = reverse $ sortOn lambda p
 -- КОНЕЦ. СЕЛЕКЦИЯ
 
 -- Отбор хромосом для некоторого процесса. 
--- На первом месте в паре хромосомы, участвующие в некотором процессе,
--- на втором - все оставшиеся. Вероятность попасть в первую группу - prob.
-selectProtein :: Double -> [Protein] -> IO ([Protein], [Protein])
+-- Функция возвращает пару, где на первом месте хромосомы, участвующие в некотором процессе,
+-- на втором - все оставшиеся. Первый параметр -- вероятность попасть в первую группу.
+selectProtein :: Double -> [Protein] ->  IO ([Protein], [Protein])
 selectProtein prob ps = do
     ps' <- (sequence $ take (length ps) $ repeat $ randomRIO (0, 1 :: Double)) >>= return . zip ps
     let (p1, p2) = partition (\x -> snd x < prob) ps'
