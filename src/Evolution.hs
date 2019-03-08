@@ -8,7 +8,7 @@ import Protein
 a               = 0.05  -- Параметр для функции оценки
 pop_size        = 5    -- Размер популяции
 prob_cros       = 0.3   -- Вероятность того, что хромосома будет участвовать в кроссинговере
-prob_cros_gene  = 0.1   -- Вероятность того, что ген в хромосоме подвергнется кроссинговеру
+prob_cros_gene  = 0.2   -- Вероятность того, что ген в хромосоме подвергнется кроссинговеру
 prob_mut        = 0.2   -- Вероятность того, что хромосома будет участвовать в мутации
 prob_mut_gene   = 0.1   -- Вероятность того, что ген в хромосоме подвергнется мутации
 
@@ -33,15 +33,14 @@ generateProtein = do
 -- Кроссинговер между особями на множестве особей
 crossingover :: [Protein] -> IO [Protein]
 crossingover ps = do
-     ps'              <- selectProtein prob_cros ps
-     (ps'_pf, ps'_ps) <- return $ makeParentsPair ps'
-     ps'_cros         <- sequence $ map crossingover' ps'_pf
-     return $ (\(x,y) -> x <> y) (revMakeParentsPair (ps'_cros, ps'_ps))
+     (ps'_f, ps'_s) <- selectProtein prob_cros ps >>= return . makeParentsPair
+     ps'_cros       <- sequence $ map crossingover' ps'_f
+     return $ (\(x,y) -> x <> y) (revMakeParentsPair (ps'_cros, ps'_s))
 
 -- Кроссинговер между парой особей
 crossingover' :: (Protein, Protein) -> IO (Protein, Protein)
 crossingover' (p1, p2) = do
-     let (v1, v2 ) = (variance p1, variance p2)
+     let (v1, v2) = (variance p1, variance p2)
      (v1', v2') <- crossingover'' (v1, v2) 0
      let p1' = Protein {variance = v1', protein = insertVariance $ zip v1' bros_pos, lambda = Nothing }
          p2' = Protein {variance = v2', protein = insertVariance $ zip v2' bros_pos, lambda = Nothing }
@@ -54,10 +53,9 @@ crossingover'' (v1, v2) n
     | otherwise = do
         a <- randomRIO (0, 1 :: Double)
         if a > prob_cros_gene then crossingover'' (v1, v2) (n + 1)
-        else do
-            let v1' = take n v1 <> [v2 !! n] <> drop (n + 1) v1
-                v2' = take n v2 <> [v1 !! n] <> drop (n + 1) v2
-            crossingover'' (v1', v2') (n + 1)
+        else crossingover'' (v1', v2') (n + 1)
+            where v1' = take n v1 <> [v2 !! n] <> drop (n + 1) v1
+                  v2' = take n v2 <> [v1 !! n] <> drop (n + 1) v2
                     
 -- Образовываем родительские пары. Кому-то может не достаться особи. 
 -- Такая особь отправляется во вторую группу.
