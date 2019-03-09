@@ -2,7 +2,7 @@
 module Evolution where
 
 import System.Random (randomRIO)
-import Data.List     (sortOn, partition)
+import Data.List     (sortOn, partition, delete)
 import Protein
 
 a               = 0.05  -- Параметр для функции оценки
