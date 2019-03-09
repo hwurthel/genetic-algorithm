@@ -20,9 +20,10 @@ instance Ord Protein where
     compare a b = compare (lambda a) (lambda b)
 
 instance Show Protein where
-    show p = --"\nLambda:\t" <> (show $ lambda p)-- <>
-             "\nVariance:\t" <> (variance p)-- <>
-             --"\nProtein:\t" <> (protein p)
+    show p = "Lambda:    \t" <> (show $ lambda p) <>
+             "\nVariance:\t" <> (variance p)      <>
+             "\nProtein: \t" <> (protein p)       <>
+             "\n"
 
 -- Шаблонный белок
 tmpProtein :: Protein
@@ -69,6 +70,7 @@ selectAminoacid x = do
 -- Расчет вероятности того, что будет сгенерирована 
 -- полная популяция при заданных числах генов и особей 
 -- при указанных выше параметрах
+getProbFulPop :: [Integer] -> [(Double, Integer)]
 getProbFulPop ns = zip f ns
     where 
         f = map (product.(\n -> (map probFulPop l) <*> [n])) ns

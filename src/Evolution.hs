@@ -1,10 +1,10 @@
 -- Модуль содержит реализацию процессов эволюции
 module Evolution
     (
-          generatePopulation
-        , crossover
-        , mutation
-        , selection
+      generatePopulation
+    , crossover
+    , mutation
+    , selection
     ) where
 
 import System.Random (randomRIO)
