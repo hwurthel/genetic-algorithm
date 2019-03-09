@@ -1,1 +1,1 @@
-# gen-alg
+# genetic algorithm
