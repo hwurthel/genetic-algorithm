@@ -12,10 +12,10 @@ import Control.Concurrent (threadDelay)
 
 import Protein
 
-out_file = "oufile"
-tmp_of = "tmp_out"
-tmp_if  = "tmp_in"
-time_wait    = 5*10^6 -- микросекунды
+out_file  = "oufile"
+tmp_of    = "tmp_out"
+tmp_if    = "tmp_in"
+time_wait = 5*10^6 -- микросекунды
 
 computeLambda :: [Protein] -> IO [Protein]
 computeLambda ps = do
