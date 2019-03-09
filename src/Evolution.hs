@@ -1,5 +1,11 @@
 -- Модуль содержит реализацию процессов эволюции
-module Evolution where
+module Evolution
+    (
+          generatePopulation
+        , crossover
+        , mutation
+        , selection
+    ) where
 
 import System.Random (randomRIO)
 import Data.List     (sortOn, partition, delete)
@@ -31,29 +37,29 @@ generateProtein = do
 
 -- НАЧАЛО. КРОССИНГОВЕР
 -- Кроссинговер между особями на множестве особей
-crossingover :: [Protein] -> IO [Protein]
-crossingover ps = do
+crossover :: [Protein] -> IO [Protein]
+crossover ps = do
      (ps'_f, ps'_s) <- selectProtein prob_cros ps >>= return . makeParentsPair
-     ps'_cros       <- sequence $ map crossingover' ps'_f
+     ps'_cros       <- sequence $ map crossover' ps'_f
      return $ (\(x,y) -> x <> y) (revMakeParentsPair (ps'_cros, ps'_s))
 
 -- Кроссинговер между парой особей
-crossingover' :: (Protein, Protein) -> IO (Protein, Protein)
-crossingover' (p1, p2) = do
+crossover' :: (Protein, Protein) -> IO (Protein, Protein)
+crossover' (p1, p2) = do
      let (v1, v2) = (variance p1, variance p2)
-     (v1', v2') <- crossingover'' (v1, v2) 0
+     (v1', v2') <- crossover'' (v1, v2) 0
      let p1' = Protein {variance = v1', protein = insertVariance $ zip v1' bros_pos, lambda = Nothing }
          p2' = Protein {variance = v2', protein = insertVariance $ zip v2' bros_pos, lambda = Nothing }
      return (p1', p2')
 
 -- Кроссинговер между парой особей. Вспомогательная функция
-crossingover'' :: ([Aminoacid], [Aminoacid]) -> Int -> IO ([Aminoacid], [Aminoacid]) 
-crossingover'' (v1, v2) n
+crossover'' :: ([Aminoacid], [Aminoacid]) -> Int -> IO ([Aminoacid], [Aminoacid]) 
+crossover'' (v1, v2) n
     | n == length bros = return (v1, v2)
     | otherwise = do
         a <- randomRIO (0, 1 :: Double)
-        if a > prob_cros_gene then crossingover'' (v1, v2) (n + 1)
-        else crossingover'' (v1', v2') (n + 1)
+        if a > prob_cros_gene then crossover'' (v1, v2) (n + 1)
+        else crossover'' (v1', v2') (n + 1)
             where v1' = take n v1 <> [v2 !! n] <> drop (n + 1) v1
                   v2' = take n v2 <> [v1 !! n] <> drop (n + 1) v2
                     
