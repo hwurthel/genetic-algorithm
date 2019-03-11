@@ -1,3 +1,3 @@
-# Changelog for gen-alg
+# Changelog for genetic-algorithm
 
 ## Unreleased changes

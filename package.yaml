@@ -1,6 +1,6 @@
-name:                gen-alg
+name:                genetic-algorithm
 version:             0.1.0.0
-github:              "githubuser/gen-alg"
+github:              "githubuser/genetic-algorithm"
 license:             BSD3
 author:              "Author name here"
 maintainer:          "example@example.com"
@@ -11,13 +11,13 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-# synopop_sizeis:            Short description of your package
+# synopsis:            Short description of your package
 # category:            Web
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <httpop_size://github.com/githubuser/gen-alg#readme>
+description:         Please see the README on GitHub at <https://github.com/githubuser/genetic-algorithm#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -28,7 +28,7 @@ library:
   source-dirs: src
 
 executables:
-  gen-alg-exe:
+  genetic-algorithm-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -36,10 +36,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - gen-alg
+    - genetic-algorithm
 
 tests:
-  gen-alg-test:
+  genetic-algorithm-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -47,4 +47,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - gen-alg
+    - genetic-algorithm
