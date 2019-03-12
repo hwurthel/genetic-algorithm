@@ -1,5 +1,5 @@
 module StopCondition where
 
 isStop :: Int -> Bool
-isStop 2 = True
+isStop 5 = True
 isStop _ = False 
