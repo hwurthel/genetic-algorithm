@@ -75,19 +75,10 @@ getProbFulPop ns = zip f ns
     where 
         f = map (product.(\n -> (map probFulPop l) <*> [n])) ns
         l = map (fromIntegral.length.fst) bros
-    -- Расшифровка f:
-    -- 1. map probFulPop l -- образуем массив [probFulPop l1, probFulPop l2...], где l - список числа генов в локусе
-    -- 1. \n -> (map probFulPop l) <*> [n] -- образуем массив [probFulPop l1 n, probFulPop l2 n,...]
-    -- 3. (product.(\n -> (map probFulPop l) <*> [n])) -- перемножаем элементы предыдушего шага (probFulPop l1 n)*(probFulPop l2 n)
-    -- 4. map (product.(\n -> (map probFulPop l) <*> [n])) ns -- образуем массив
-    -- [(probFulPop l1 n1)*(probFulPop l2 n1)*.., 
-    --  (probFulPop l1 n2)*(probFulPop l2 n2)*..,
-    --  (probFulPop l1 n3)*(probFulPop l2 n3)*..,]
 
 -- Расчет вероятности того, что будет сгенерирована 
 -- полная популяция при заданных числах генов и особей
--- m - Число генов
--- n - число особей
+-- m - число генов, n - число особей
 factorial :: Integer -> Integer
 factorial 0 = 1
 factorial n = n * factorial (n - 1)
