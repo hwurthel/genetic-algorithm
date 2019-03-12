@@ -9,6 +9,7 @@ module IO
 import System.IO
 import System.Directory   (removeFile, doesFileExist)
 import Control.Concurrent (threadDelay)
+import Data.List          (notElem, partition, intersectBy)
 
 import Protein
 
@@ -17,17 +18,19 @@ tmp_of    = "./data/tmp_out"
 tmp_if    = "./data/tmp_in"
 time_wait = 5*10^6 -- микросекунды
 
-computeLambda :: [Protein] -> IO [Protein]
-computeLambda ps = do
-    withFile tmp_of WriteMode writeProtein
+computeLambda :: [Protein] -> [Protein] -> IO [Protein]
+computeLambda p ps = do
+    let (p_a, p_b)   = ( [x | x <- p , variance x `notElem` (map variance ps)]
+                       , [x | x <- ps, variance x `elem`    (map variance p) ] )
+    withFile tmp_of WriteMode (writeProtein p_a)
     wait True 
-    res <- withFile tmp_if ReadMode readProtein
+    p_a' <- withFile tmp_if ReadMode (readProtein p_a)
     removeFile tmp_of
     removeFile tmp_if
-    return res
+    return (p_a' <> p_b) 
     where 
-        writeProtein = \hdl -> mapM_ (\p' -> hPutStrLn hdl $ protein p') ps
-        readProtein = \hdl -> mapM (\p' -> hGetLine hdl >>= return . (update p'). read) ps
+        writeProtein ps = \hdl -> mapM_ (\p' -> hPutStrLn hdl $ protein p') ps
+        readProtein  ps = \hdl -> mapM (\p' -> hGetLine hdl >>= return . (update p'). read) ps
         update p x = p { lambda = Just x }
         wait False = return ()
         wait True  = do 

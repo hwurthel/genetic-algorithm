@@ -7,9 +7,9 @@ import IO
 
 main :: IO ()
 main = do
-    let stepOfEvolution = \x -> x >>= crossover >>= mutation >>= computeLambda >>= selection
+    let stepOfEvolution = \x xs -> x >>= crossover >>= mutation >>= flip computeLambda xs >>= selection
         process n (x, xs) = do
-            x'  <- stepOfEvolution x
+            x'  <- stepOfEvolution x xs
             xs' <- return $ xs <> x'
             writeInFile ("Step " <> show n <> "\n") x'
             if isStop n then return xs'
