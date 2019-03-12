@@ -13,9 +13,9 @@ import Data.List          (notElem, partition, intersectBy)
 
 import Protein
 
-out_file  = "./data/result"
-tmp_of    = "./data/tmp_out"
-tmp_if    = "./data/tmp_in"
+out_file  = "result"
+tmp_of    = "tmp_out"
+tmp_if    = "tmp_in"
 time_wait = 5*10^6 -- микросекунды
 
 computeLambda :: [Protein] -> [Protein] -> IO [Protein]
