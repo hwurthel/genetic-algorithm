@@ -36,7 +36,7 @@ tmpProtein = Protein {
                "WGTVSTIPFAYILYVLWVELSRSLVRQPAAVQTLVRNMRWLLLL" <>
                "SWGVYPIAYLLPMLGVSGTSAAVGVQVGYTIADVLAKPVFGLLV" <>
                "FAIALVKTKADQESSEPHAAIGAAANKSGGSLIS",
-    lambda   = Just 750
+    lambda   = Nothing
     }
 
     
