@@ -30,15 +30,15 @@ computeLambda p ps = do
         p_b = map (\x -> x {lambda = lambda (inPs x)}) (p \\ p_a)
               where inPs = \x -> fromJust $ find (== x) ps 
     
-    -- putStrLn "P"
-    -- putStrLn $ show  (zip (map variance p) (map lambda p))        
-    -- putStrLn "P_A"
-    -- putStrLn $ show (zip (map variance p_a) (map lambda p_a))
-    -- putStrLn "P_B"
-    -- putStrLn $ show (zip (map variance p_b) (map lambda p_b))
-    -- putStrLn "PS"   
-    -- putStrLn $ show (zip (map variance ps) (map lambda ps))
-    -- putStrLn ""
+    putStrLn "Current population"
+    putStrLn $ show  (zip (map variance p) (map lambda p))        
+    putStrLn "Will be computed"
+    putStrLn $ show (zip (map variance p_a) (map lambda p_a))
+    putStrLn "Won't be computed"
+    putStrLn $ show (zip (map variance p_b) (map lambda p_b))
+    putStrLn "All proteins"   
+    putStrLn $ show (zip (map variance ps) (map lambda ps))
+    putStrLn ""
 
     withFile tmp_of WriteMode (writeProtein p_a)
     wait True
