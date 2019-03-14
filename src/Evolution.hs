@@ -16,7 +16,7 @@ a               = 0.05  -- Параметр для функции оценки
 pop_size        = 10    -- Размер популяции
 prob_cros       = 0.3   -- Вероятность того, что хромосома будет участвовать в кроссинговере
 prob_cros_gene  = 0.2   -- Вероятность того, что ген в хромосоме подвергнется кроссинговеру
-prob_mut        = 0.2   -- Вероятность того, что хромосома будет участвовать в мутации
+prob_mut        = 1   -- Вероятность того, что хромосома будет участвовать в мутации
 prob_mut_gene   = 0.1   -- Вероятность того, что ген в хромосоме подвергнется мутации
 -- КОНЕЦ.
 
@@ -40,9 +40,12 @@ generateProtein = do
 -- НАЧАЛО. КРОССИНГОВЕР
 -- Кроссинговер между особями на множестве особей
 crossover :: [Protein] -> IO [Protein]
+crossover [] = return []
 crossover ps = do
+     print "Crossover START"
      (ps'_f, ps'_s) <- selectProtein prob_cros ps >>= return . makeParentsPair
      ps'_cros       <- sequence $ map crossover' ps'_f
+     print "Crossover END"
      return $ (\(x,y) -> x <> y) (revMakeParentsPair (ps'_cros, ps'_s))
 
 -- Кроссинговер между парой особей
@@ -83,20 +86,26 @@ revMakeParentsPair ((x:xs), y) = ([fst x], []) <> ([snd x], []) <> revMakeParent
 -- (из набора изменяемых, исключая текущую аминоксилоты) происходит с 
 -- вероятностью 0.3.
 mutation :: [Protein] -> IO [Protein]
+mutation [] = return []
 mutation ps = do
+    print "Mutation START"
     (ps'_f, ps'_s) <- selectProtein prob_mut ps
     ps'_mut        <- sequence $ map mutation' ps'_f
+    print "Mutation END"
     return (ps'_mut <> ps'_s) 
 
 mutation' :: Protein -> IO Protein
 mutation' p = do
+    print "Mutation' START"
     let v = zip (variance p) bros_var
     v' <- sequence $ map (uncurry mutation'') v
     let p' = Protein {variance = v', protein = insertVariance $ zip v' bros_pos, lambda = Nothing }
+    print "Mutation' END"
     return p'
 
 mutation'' :: Aminoacid -> [Aminoacid] -> IO Aminoacid
 mutation'' a as = do
+    print "Mutation'' START"
     r <- randomRIO (0, 1 :: Double)
     if r > prob_mut_gene then return a
     else selectAminoacid (delete a as) 
@@ -105,12 +114,17 @@ mutation'' a as = do
 -- НАЧАЛО. СЕЛЕКЦИЯ
 -- Выбирается pop_size лучших особей.
 selection :: [Protein] -> IO [Protein]
-selection p = selection' 0 (sortPopulation p) 
+selection [] = return []
+selection p = do
+    print "Selection START"
+    selection' 0 (sortPopulation p) 
     where 
         q = map (\n -> sum $ map eval [1..n]) [1..pop_size]
         selectNum r (x:xs) = 1 + (if r > x then selectNum r xs else 0)
         selection' n p
-            | n == pop_size = return []
+            | n == pop_size = do
+                print "Selection END"
+                return []
             | otherwise = do
                 r <- randomRIO (0, last q)
                 let i = selectNum r q
@@ -132,7 +146,9 @@ sortPopulation p = reverse $ sortOn lambda p
 -- на втором - все оставшиеся. Первый параметр -- вероятность попасть в первую группу.
 selectProtein :: Double -> [Protein] ->  IO ([Protein], [Protein])
 selectProtein prob ps = do
+    print "selectProtein START"
     ps' <- (sequence $ take (length ps) $ repeat $ randomRIO (0, 1 :: Double)) >>= return . zip ps
     let (p1, p2) = partition (\x -> snd x < prob) ps'
+    print "selectProtein END"
     return (map fst p1, map fst p2)
 

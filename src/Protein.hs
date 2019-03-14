@@ -64,7 +64,9 @@ insertVariance x = foldl insert (protein tmpProtein) x
 -- Взятие случайной аминокислоты из набора доступных
 selectAminoacid :: [Aminoacid] -> IO Aminoacid
 selectAminoacid x = do
+    print "selectAminoacid START"
     r <- randomRIO (0, length x - 1)
+    print "selectAminoacid END"
     return $ x !! r
 
 -- Расчет вероятности того, что будет сгенерирована 
