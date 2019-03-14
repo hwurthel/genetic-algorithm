@@ -10,7 +10,7 @@ import System.IO
 import System.Directory   (removeFile, doesFileExist)
 import Control.Concurrent (threadDelay)
 import Data.List          (notElem, partition, intersectBy, 
-                           findIndex, (\\))
+                           find, (\\))
 import Data.Maybe         (fromJust)
 
 import Protein
@@ -22,9 +22,13 @@ time_wait = 5*10^6 -- микросекунды
 
 computeLambda :: [Protein] -> [Protein] -> IO [Protein]
 computeLambda p ps = do
+    -- |Реализовать алгоритм выбора белков @p_a@ и @p_b@
+    -- можно иначе -- сначала найти @p_b@, а потом искать @p_a@
+    -- как дополнение @p_b@ до @p@. Такая реализация
+    -- окажется быстрее. СДЕЛАТЬ ПОТОМ
     let p_a = [x | x <- p , x `notElem` ps]
-        p_b = map (\x -> x {lambda = lambda (ps !! ind x)}) (p \\ p_a)
-              where ind = \x -> fromJust $ findIndex (== x) ps 
+        p_b = map (\x -> x {lambda = lambda (inPs x)}) (p \\ p_a)
+              where inPs = \x -> fromJust $ find (== x) ps 
     
     -- putStrLn "P"
     -- putStrLn $ show  (zip (map variance p) (map lambda p))        
