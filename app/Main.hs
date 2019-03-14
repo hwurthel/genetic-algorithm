@@ -3,9 +3,9 @@ module Main where
 import StopCondition
 import Evolution
 import Protein
-import IO
+import InputOutput
 
-import Data.List (sortOn, length)
+import Data.List
 
 main :: IO ()
 main = do

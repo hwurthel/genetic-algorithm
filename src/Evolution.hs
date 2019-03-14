@@ -1,24 +1,18 @@
 -- Модуль содержит реализацию процессов эволюции
-module Evolution
+module Evolution 
     (
       generatePopulation
     , crossover
     , mutation
     , selection
     ) where
-
-import System.Random (randomRIO)
-import Data.List     (sortOn, partition, delete)
+        
 import Protein
+import Config (eval_param, pop_size, prob_cros, 
+        prob_cros_gene, prob_mut, prob_mut_gene)
 
--- | НАЧАЛО. КОНФИГУРАЦИОННЫЕ ПАРАМЕТРЫ
-a               = 0.05  -- Параметр для функции оценки
-pop_size        = 10    -- Размер популяции
-prob_cros       = 1     -- Вероятность того, что хромосома будет участвовать в кроссинговере
-prob_cros_gene  = 0.6   -- Вероятность того, что ген в хромосоме подвергнется кроссинговеру
-prob_mut        = 1     -- Вероятность того, что хромосома будет участвовать в мутации
-prob_mut_gene   = 0.2   -- Вероятность того, что ген в хромосоме подвергнется мутации
--- КОНЕЦ.
+import System.Random
+import Data.List
 
 -- | НАЧАЛО. ГЕНЕРАЦИЯ ПОПУЛЯЦИИ
 -- | Инициализатор популяции
@@ -125,7 +119,7 @@ selection p = do
 
 -- | Функция ранжирования
 eval :: Int -> Double
-eval n = a*(1-a)^(n-1)
+eval n = eval_param*(1-eval_param)^(n-1)
 
 -- | Ранжирование популяции от лучшей (на первом месте) к худшей
 sortPopulation :: [Protein] -> [Protein]

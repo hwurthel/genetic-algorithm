@@ -1,24 +1,20 @@
--- Модуль взаимодействия программы
+-- | Модуль взаимодействия программы
 -- с внешними программами
-module IO 
+module InputOutput
     (
       computeLambda
     , writeInFile
     ) where
-    
+
+import Config (out_file, tmp_of, tmp_if,time_wait)
+
 import System.IO
-import System.Directory   (removeFile, doesFileExist)
-import Control.Concurrent (threadDelay)
-import Data.List          (notElem, partition, intersectBy, 
-                           find, (\\))
-import Data.Maybe         (fromJust)
+import System.Directory
+import Control.Concurrent
+import Data.List
+import Data.Maybe
 
 import Protein
-
-out_file  = "result"
-tmp_of    = "tmp_out"
-tmp_if    = "tmp_in"
-time_wait = 5*10^6 -- микросекунды
 
 computeLambda :: [Protein] -> [Protein] -> IO [Protein]
 computeLambda p ps = do
@@ -32,13 +28,13 @@ computeLambda p ps = do
     
     putStrLn "Current population"
     putStrLn $ show  (zip (map variance p) (map lambda p))        
-    putStrLn "Will be computed"
+    putStrLn "\nWill be computed"
     putStrLn $ show (zip (map variance p_a) (map lambda p_a))
-    putStrLn "Won't be computed"
+    putStrLn "\nWon't be computed"
     putStrLn $ show (zip (map variance p_b) (map lambda p_b))
-    putStrLn "All proteins"   
+    putStrLn "\nAll proteins"   
     putStrLn $ show (zip (map variance ps) (map lambda ps))
-    putStrLn ""
+    putStrLn "----------------------------------------------"
 
     withFile tmp_of WriteMode (writeProtein p_a)
     wait True

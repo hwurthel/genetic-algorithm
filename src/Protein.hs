@@ -1,7 +1,7 @@
--- Модуль содержит описание структуры Protein
+-- | Модуль содержит описание структуры Protein
 module Protein where
 
-import System.Random (randomRIO)
+import System.Random
 
 type Aminoacid = Char
 
