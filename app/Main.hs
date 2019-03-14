@@ -13,15 +13,13 @@ main = do
             -- | Производим один шаг эволюции.
             -- Если это первая популяция, то только
             -- считаем параметры @pop_x@
-            
             pop_x' <- 
                 if n == 1 
-                then pop_x >>= computeLambda all_x
-                else pop_x >>= selection >>= crossover >>= mutation >>= computeLambda all_x
+                then pop_x >>= flip computeLambda all_x
+                else pop_x >>= selection >>= crossover >>= mutation >>= flip computeLambda all_x
             
             -- | Печатаем новую популяцию @pop_x'@ в @out_file@
             -- (определение @out_file@ смотри в модуле IO.hs)
-            writeInFile ("Step " <> (show $ length (pop_x')) <> "\n") []
             writeInFile ("Step " <> show n <> "\n") pop_x'
             
             -- | Дополняем множество всех особей @all_x@ 

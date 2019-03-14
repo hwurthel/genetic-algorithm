@@ -11,11 +11,14 @@ data Protein = Protein { protein   :: [Aminoacid]
                        , lambda    :: Maybe Double
                        } 
 
--- Полагаем, что белок является "лучше", если
--- значение lambda больше
+-- | Белки одинаковы, если последовательности
+-- аминокислот одинакова @protein@. Но так как отличия 
+-- только в @variance@, то сравниваем это поле.
 instance Eq Protein where
-    (==) a b = (==) (lambda a) (lambda b)
+    (==) a b = (==) (variance a) (variance b)
 
+-- | Белок является "лучше", если
+-- значение поля @lambda@ больше.
 instance Ord Protein where
     compare a b = compare (lambda a) (lambda b)
 
@@ -64,9 +67,7 @@ insertVariance x = foldl insert (protein tmpProtein) x
 -- Взятие случайной аминокислоты из набора доступных
 selectAminoacid :: [Aminoacid] -> IO Aminoacid
 selectAminoacid x = do
-    print "selectAminoacid START"
     r <- randomRIO (0, length x - 1)
-    print "selectAminoacid END"
     return $ x !! r
 
 -- Расчет вероятности того, что будет сгенерирована 
