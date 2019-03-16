@@ -13,12 +13,12 @@ import Data.Maybe
 insertMolecule :: IO ()
 insertMolecule = do
     args <- getArgs
-    let zmatr_name = args !! 0
-        mol_name   = args !! 1
-        n = read $ args !! 2
-        s = read $ args !! 3
-        e = read $ args !! 4
-        resname = args !! 5
+    let zmatr_name = args !! 1
+        mol_name   = args !! 2
+        n = read $ args !! 3
+        s = read $ args !! 4
+        e = read $ args !! 5
+        resname = args !! 6
     zmatrix <- readZMatrix zmatr_name
     molecule <- readMolecule mol_name
     let moleculeM = setAtomWithOutOptimization n zmatrix molecule
@@ -64,4 +64,9 @@ geneticAlgorithm = do
 
 main :: IO ()
 main = do
-    print "Hello World!"
+    args <- getArgs
+    let programm = args !! 0
+    case programm of
+        "insertMolecule"   -> insertMolecule
+        "geneticAlgorithm" -> geneticAlgorithm
+    return ()
