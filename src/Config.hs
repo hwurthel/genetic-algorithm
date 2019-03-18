@@ -30,6 +30,7 @@ tmp_lambda = get "tmp_lambda" read
 -- | Набор заменяемых аминокислот
 bros_list :: [([Char], Int)]
 bros_list = get "bros" readBros
+    where readBros s = [(id x, read y) | p <- splitOn "_" s, let (x:y:[]) = splitOn ":" p]
 
 -- | Выходной файл
 out_file :: String
