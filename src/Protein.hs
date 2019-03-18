@@ -1,11 +1,7 @@
 -- | Модуль содержит описание структуры Protein
 module Protein where
 
-<<<<<<< HEAD
 import Config (tmp_protein, tmp_lambda, bros_list)
-=======
-import Config (tmp_protein, tmp_lambda, tmp_bros)
->>>>>>> aaaee605b8352a091159a7def56bfb3a20e59d50
 import System.Random
 
 type Aminoacid = Char
@@ -43,11 +39,7 @@ tmpProtein = Protein {
 -- | Пары, определяющие, в каком месте белка и на какую аминокислоту
 -- мы можем произвести замену
 bros :: [([Aminoacid], Int)]
-<<<<<<< HEAD
 bros = bros_list
-=======
-bros = tmp_bros
->>>>>>> aaaee605b8352a091159a7def56bfb3a20e59d50
 
 bros_var = fst . unzip $ bros
 bros_pos = snd . unzip $ bros

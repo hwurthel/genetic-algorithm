@@ -28,14 +28,8 @@ tmp_lambda :: Maybe Double
 tmp_lambda = get "tmp_lambda" read
 
 -- | Набор заменяемых аминокислот
-<<<<<<< HEAD
 bros_list :: [([Char], Int)]
 bros_list = get "bros" readBros
-=======
-tmp_bros :: [([Char], Int)]
-tmp_bros = get "bros" readBros
->>>>>>> aaaee605b8352a091159a7def56bfb3a20e59d50
-    where readBros s = [(id x, read y) | p <- splitOn "_" s, let (x:y:[]) = splitOn ":" p]
 
 -- | Выходной файл
 out_file :: String
