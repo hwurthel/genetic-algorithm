@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d0db1e5593eee1dd0dfeec46dd330a33d48c68977c6873c654be4be9af0fc22f
+-- hash: cab9a12150612501474b8bb81265eef3b82b80b5fbcd6fcd541291f22adf5c9c
 
 name:           genetic-algorithm
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
       base >=4.7 && <5
     , directory
     , random
+    , split
   default-language: Haskell2010
 
 executable genetic-algorithm-exe
@@ -53,6 +54,7 @@ executable genetic-algorithm-exe
     , directory
     , genetic-algorithm
     , random
+    , split
   default-language: Haskell2010
 
 test-suite genetic-algorithm-test
@@ -68,4 +70,5 @@ test-suite genetic-algorithm-test
     , directory
     , genetic-algorithm
     , random
+    , split
   default-language: Haskell2010
