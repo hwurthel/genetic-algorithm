@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d0db1e5593eee1dd0dfeec46dd330a33d48c68977c6873c654be4be9af0fc22f
+-- hash: 3505b4dbdb1b13b4aa9b9fbd73349857f60b45e5e9f3206f6f088fc441b57aec
 
 name:           genetic-algorithm
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       InputOutput
       Protein
       StopCondition
+      Utils
   other-modules:
       Paths_genetic_algorithm
   hs-source-dirs:
@@ -39,6 +40,7 @@ library
       base >=4.7 && <5
     , directory
     , random
+    , split
   default-language: Haskell2010
 
 executable genetic-algorithm-exe
@@ -53,6 +55,7 @@ executable genetic-algorithm-exe
     , directory
     , genetic-algorithm
     , random
+    , split
   default-language: Haskell2010
 
 test-suite genetic-algorithm-test
@@ -68,4 +71,5 @@ test-suite genetic-algorithm-test
     , directory
     , genetic-algorithm
     , random
+    , split
   default-language: Haskell2010
