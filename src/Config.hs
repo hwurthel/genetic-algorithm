@@ -19,18 +19,24 @@ get key f = case lookup key readConfig of
     Nothing -> error ("get: not found: " ++ key)
     Just x  -> f x
 
--- | Шаблонный белок
+-- | Параметр @protein@ шаблонного белка
 tmp_protein :: String
 tmp_protein = get "tmp_protein" id
 
--- | Параметр шаблонного белка
+-- | Параметр @variance@ шаблонного белка
+tmp_variance :: String
+tmp_variance =  get "tmp_variance" id
+
+-- | Параметр @lambda@ шаблонного белка
 tmp_lambda :: Maybe Double
 tmp_lambda = get "tmp_lambda" read
 
 -- | Набор заменяемых аминокислот
-bros_list :: [([Char], Int)]
+bros_list :: [([Char], Int, Double, Double)]
 bros_list = get "bros" readBros
-    where readBros s = [(id x, read y) | p <- splitOn "_" s, let (x:y:[]) = splitOn ":" p]
+    where readBros s = [(id a, read b, read c, read d) 
+                        | p <- splitOn "_" s, 
+                        let (a:b:c:d:[]) = splitOn ":" p]
 
 -- | Выходной файл
 out_file :: String
@@ -60,14 +66,6 @@ pop_size = get "pop_size" read
 prob_cros :: Double 
 prob_cros = get "prob_cros" read
 
--- | Вероятность того, что ген в хромосоме подвергнется кроссинговеру
-prob_cros_gene :: Double
-prob_cros_gene = get "prob_cros_gene" read
-
 -- | Вероятность того, что хромосома будет участвовать в мутации
 prob_mut :: Double
 prob_mut = get "prob_mut" read
-
--- | Вероятность того, что ген в хромосоме подвергнется мутации
-prob_mut_gene :: Double
-prob_mut_gene = get "prob_mut_gene" read

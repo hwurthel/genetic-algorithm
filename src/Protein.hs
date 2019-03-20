@@ -1,7 +1,9 @@
 -- | Модуль содержит описание структуры Protein
 module Protein where
 
-import Config (tmp_protein, tmp_lambda, bros_list)
+import Data.List
+import Utils
+import Config (tmp_protein, tmp_lambda, tmp_variance, bros_list)
 import System.Random
 
 type Aminoacid = Char
@@ -30,19 +32,17 @@ instance Show Protein where
 -- | Шаблонный белок
 tmpProtein :: Protein
 tmpProtein = Protein { 
-    variance = [],
+    variance = tmp_variance,
     protein  = tmp_protein,
     lambda   = tmp_lambda
     }
 
-    
 -- | Пары, определяющие, в каком месте белка и на какую аминокислоту
 -- мы можем произвести замену
-bros :: [([Aminoacid], Int)]
-bros = bros_list
-
-bros_var = fst . unzip $ bros
-bros_pos = snd . unzip $ bros
+bros_variance  = fst4 $ unzip4 bros_list
+bros_position  = snd4 $ unzip4 bros_list
+bros_prob_cros = trd4 $ unzip4 bros_list
+bros_prob_mut  = fth4 $ unzip4 bros_list
 
 -- | Вставка изменяемых аминокислот в шаблонный белок
 -- с целью получить вид полученного белка  

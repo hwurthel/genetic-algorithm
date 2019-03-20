@@ -1,36 +1,34 @@
 -- | Описание белка
-tmp_protein = MLMTVFSSAPELALLGSTFAQVDPSNLSVSDSLTYGQFNLVYNAFSFAIAAMFASALFFFSAQALVGQRYRLALLVSAIVVSIAGYHYFRIFNSWDAAYVLENGVYSLTSEKFNDAYRYVDWLLTVPLLLVETVAVLTLPAKEARPLLIKLTVASVLMIATGYPGEISDDITTRIIWGTVSTIPFAYILYVLWVELSRSLVRQPAAVQTLVRNMRWLLLLSWGVYPIAYLLPMLGVSGTSAAVGVQVGYTIADVLAKPVFGLLVFAIALVKTKADQESSEPHAAIGAAANKSGGSLIS
-tmp_lambda  = Nothing
+tmp_protein  = MLMTVFSSAPELALLGSTFAQVDPSNLSVSDSLTYGQFNLVYNAFSFAIAAMFASALFFFSAQALVGQRYRLALLVSAIVVSIAGYHYFRIFNSWDAAYVLENGVYSLTSEKFNDAYRYVDWLLTVPLLLVETVAVLTLPAKEARPLLIKLTVASVLMIATGYPGEISDDITTRIIWGTVSTIPFAYILYVLWVELSRSLVRQPAAVQTLVRNMRWLLLLSWGVYPIAYLLPMLGVSGTSAAVGVQVGYTIADVLAKPVFGLLVFAIALVKTKADQESSEPHAAIGAAANKSGGSLIS
+tmp_lambda   = Nothing
+tmp_variance = DTLWYPDA
 
--- | Наборы заменяемых аминокислот
-bros        = DAPQGSKTLVNWM:121_TCDGLNV:125_LKW:129_WM:222_YA:225_PIV:226_DET:253_AM:256
+-- | Наборы заменяемых аминокислот.
+-- Через символ '_' перечисляются наборы.
+-- Через символ ':' перечисляются параметры набора в следующем порядке:
+-- варианты аминокислот, позиция в белке, вероятность кроссовера, вероятность мутации
+bros  = DAPQGSKTLVNWM:121:0.1:0.2_TCDGLNV:125:0.1:0.2_LKW:129:0.1:0.2_WM:222:0.1:0.2_YA:225:0.1:0.2_PIV:226:0.1:0.2_DET:253:0.1:0.2_AM:256:0.1:0.2
 
 -- | Выходной файл
-out_file 	= result
+out_file = result
 
 -- | Входной файл для обсчета параметров белка
-tmp_of   	= tmp_of
+tmp_of  = tmp_of
 
 -- | Входной файл, где находятся обсчитанные параметры
-tmp_if   	= tmp_if
+tmp_if = tmp_if
 
 -- | Время задержки перед проверка файла @tmp_if@, в мкс
-time_wait 	= 5000000
+time_wait = 5000000
 
 -- | Параметр для функции оценки
-eval_param 	= 0.05
+eval_param = 0.05
 
 -- | Размер популяции
-pop_size   	= 10
+pop_size = 10
 
 -- | Вероятность того, что хромосома будет участвовать в кроссинговере
-prob_cros  	= 0.5
-
--- | Вероятность того, что ген в хромосоме подвергнется кроссинговеру
-prob_cros_gene  = 0.5
+prob_cros = 0.5
 
 -- | Вероятность того, что хромосома будет участвовать в мутации
-prob_mut        = 0.5
-
--- | Вероятность того, что ген в хромосоме подвергнется мутации
-prob_mut_gene   = 0.5
+prob_mut = 0.5
