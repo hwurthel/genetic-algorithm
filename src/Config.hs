@@ -10,8 +10,8 @@ config_file = "config"
 
 readConfig :: Config
 readConfig = [(key, val) | 
-                line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x `notElem` [""]) $ lines s,
-                let (key : _ : val : _) = words line]
+                line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x /= "" ) $ lines s,
+                let (key, val) = (\x -> (head x, unwords $ drop 2 x)) $ words line]
     where s = unsafePerformIO $ readFile config_file 
 
 get :: String -> (String -> a) -> a
@@ -35,8 +35,8 @@ tmp_lambda = get "tmp_lambda" read
 bros_list :: [([Char], Int, Double, Double)]
 bros_list = get "bros" readBros
     where readBros s = [(id a, read b, read c, read d) 
-                        | p <- splitOn "_" s, 
-                        let (a:b:c:d:[]) = splitOn ":" p]
+                        | p <- splitOn "," s, 
+                        let (a:b:c:d:[]) = words p]
 
 -- | Выходной файл
 out_file :: String
