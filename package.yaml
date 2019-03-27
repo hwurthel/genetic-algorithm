@@ -23,6 +23,7 @@ dependencies:
 - random
 - directory
 - split
+- containers
 
 library:
   source-dirs: src

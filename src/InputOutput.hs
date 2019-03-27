@@ -46,7 +46,7 @@ computeLambda p ps = do
         writeProtein ps = \hdl -> mapM_ (\p' -> hPutStrLn hdl $ protein p') ps
         readProtein  ps = \hdl -> mapM (\p' -> hGetLine hdl >>= 
                                   return . (\x -> p' { lambda = Just x }). read) ps
-        wait False = return ()
+        wait False = return () -- Рассмотреть функцию hWaitForInput
         wait True  = do 
             e <- doesFileExist tmp_if 
             if e then wait False
