@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 665ab05e5ee0fb987066d15337432e36218efc31a1c264d347aa5fa5d96fdedc
+-- hash: 05f3c69953aa2055f814f3de8b65e1089881d292c956b2d53a06f06ed881577f
 
 name:           genetic-algorithm
 version:        0.1.0.0
@@ -52,7 +52,7 @@ executable genetic-algorithm-exe
       Paths_genetic_algorithm
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -package fclabels-2.0.3.3
   build-depends:
       base >=4.7 && <5
     , containers
