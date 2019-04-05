@@ -1,8 +1,7 @@
 -- | Модуль взаимодействия программы
 -- с внешними программами
 module InputOutput
-    (
-      computeLambda
+    ( computeLambda
     , writeInFile
     ) where
 

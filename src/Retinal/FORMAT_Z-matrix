@@ -1,9 +1,0 @@
-FORMAT
-ID		Atom		Bond		Angle		Bond	Dihedral	Dihedral  Atom	Atom	Radius
-		Connect		Distance	Connect		Angle	Connect		Angle	  Name  Elem
-a0		a1			a2			a3			a4		a5			a6		  a7	a8		a9
-
-3345 	Nothing		Nothing		Nothing		Nothing	Nothing		Nothing	  CA	C		1.282
-3343 	3345		1.46		Nothing		Nothing	Nothing		Nothing	  NA 	N		1.248
-3341	3343		1.33		3345		124.50	Nothing		Nothing	  CA 	C		1.282
-3339	3341		1.38		3343		122.57	3345		-162.50	  CA 	C		1.282

@@ -1,0 +1,8 @@
+ID		Atom		Bond		Angle		Bond	Dihedral	Dihedral  Atom
+		Connect		Distance	Connect		Angle	Connect		Angle	  Name  
+a0		a1			a2			a3			a4		a5			a6		  a7	
+
+3345 	Nothing		Nothing		Nothing		Nothing	Nothing		Nothing	  CA
+3343 	3345		1.46		Nothing		Nothing	Nothing		Nothing	  NA
+3341	3343		1.33		3345		124.50	Nothing		Nothing	  CA
+3339	3341		1.38		3343		122.57	3345		-162.50	  CA

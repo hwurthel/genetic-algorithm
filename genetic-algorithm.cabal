@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 05f3c69953aa2055f814f3de8b65e1089881d292c956b2d53a06f06ed881577f
+-- hash: 834a73fcb13838c998ecdddc31af772996337be13a2de859b78cce34674c309a
 
 name:           genetic-algorithm
 version:        0.1.0.0
@@ -29,10 +29,10 @@ library
       Config
       Evolution
       InputOutput
+      InsertMolecule
       Protein
-      Retinal.InsertRetinal
-      Retinal.Types
       StopCondition
+      Trigonometry
       Utils
   other-modules:
       Paths_genetic_algorithm
