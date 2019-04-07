@@ -1,0 +1,14 @@
+:set +s
+mol = readMolecule "./Retinal/1M0L_protein.pdb"
+mat = readZMatrix "./Retinal/1M0L_retinal_zmatrix"
+x = setAtomWithoutOptimization 8 mat mol
+y = fromJust x
+writeMolecule "test" y
+
+
+:set +s
+mol <- readMolecule "./Retinal/1M0L_protein.pdb"
+mat <- readZMatrix "./Retinal/1M0L_retinal_zmatrix"
+x = setAtomWithoutOptimization 8 mat mol
+y = fromJust x
+writeMolecule "test" y
