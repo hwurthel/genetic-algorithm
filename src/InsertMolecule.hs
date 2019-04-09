@@ -28,27 +28,27 @@ import qualified System.IO.Strict as StrictIO
 import Utils
 
 -- | НАЧАЛО. ОПИСАНИЕ ТИПОВ.
-type CompType = Float
+type CompAccur = Float
 type ID      = Int
-type Point   = (CompType, CompType, CompType)
+type Point   = (CompAccur, CompAccur, CompAccur)
 type Name    = String
 type Element = String
-type Radius  = CompType
+type Radius  = CompAccur
 
 data ZElement = ZElement { _atom      :: Atom
                          , _atomid    :: Maybe ID
                          , _atomcon   :: Maybe ID
-                         , _bonddist  :: Maybe CompType
+                         , _bonddist  :: Maybe CompAccur
                          , _anglcon   :: Maybe ID
-                         , _bondangl  :: Maybe CompType
+                         , _bondangl  :: Maybe CompAccur
                          , _dihedcon  :: Maybe ID
-                         , _dihedangl :: Maybe CompType
+                         , _dihedangl :: Maybe CompAccur
                          } deriving Show
 type ZMatrix  = [ZElement]
 
 data Atom = Atom { _name     :: Name
                  , _resname  :: Name
-                 , _resseq    :: ID
+                 , _resseq   :: ID
                  , _coordin  :: Point
                  , _element  :: Element
                  , _radius   :: Radius
@@ -98,12 +98,12 @@ addAtom (id, atom) molecule = Map.insert id atom molecule
 -- вставить @n@ атомов. Если такой молекулы не нашлось, то возвращается Nothing
 setAtomWithOutOptimization :: Int -> ZMatrix -> Molecule -> Maybe Molecule
 setAtomWithOutOptimization n zmatr mol =
-    listToMaybe $ setAtomWithOutOptimization' 1 n zmatr mol
-    where setAtomWithOutOptimization' m n zmatr mol
-            | m > n     = [mol]
-            | m == 1    = concat $! setAtomWithOutOptimization' (m+1) n zmatr <$> setAtomWithOutOptimization1 1 zmatr mol
-            | m == 2    = concat $! setAtomWithOutOptimization' (m+1) n zmatr <$> setAtomWithOutOptimization2 2 zmatr mol
-            | otherwise = concat $! setAtomWithOutOptimization' (m+1) n zmatr <$> setAtomWithOutOptimization3 m zmatr mol
+    listToMaybe $ setAtomWithOutOptimization' 1 n zmatr mol newMolecule
+    where setAtomWithOutOptimization' m n zmatr originMol insMol
+            | m > n     = pure $ Map.union originMol insMol
+            | m == 1    = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization1 1 zmatr mol
+            | m == 2    = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization2 2 zmatr mol insMol
+            | otherwise = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization3 m zmatr mol insMol
 
 -- | Функция предназначена для последовательной вставки
 -- атомов молекулы из @zmatr@, находящихся в строках [s, e],
@@ -119,7 +119,7 @@ setAtomWithOptimization s e zmatr mol
 -- Возвращает ВСЕ возможные варианты молекул со вставкой.
 -- Если таковых нет, то возвращается пустой список.
 setAtomWithOutOptimization1 :: Int -> ZMatrix -> Molecule -> [Molecule]
-setAtomWithOutOptimization1 n zmatrix molecule =
+setAtomWithOutOptimization1 n zmatrix originMol =
     do
     let matrixAtom_B = zmatrix !! n
         atomID_B     = fromJust $ get atomid   matrixAtom_B
@@ -127,7 +127,7 @@ setAtomWithOutOptimization1 n zmatrix molecule =
         distance_AB  = fromJust $ get bonddist matrixAtom_B
 
         atom_B  = get atom matrixAtom_B
-        atom_A  = fromMaybe (error "setFirstAtom: atom_A not found") $ molecule Map.!? atomID_A
+        atom_A  = fromMaybe (error "setAtomWithOutOptimization1: atom_A not found") $ originMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
 
@@ -140,7 +140,7 @@ setAtomWithOutOptimization1 n zmatrix molecule =
         r3 = (,,) (x_A - m * distance_AB) (y_A + m * distance_AB) (z_A - m * distance_AB)
         r4 = (,,) (x_A - m * distance_AB) (y_A - m * distance_AB) (z_A + m * distance_AB)
         ws = sortCoordinates [r1,r2,r3,r4]
-        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_A molecule
+        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_A originMol
 
         -- | Вставляем @atom_B@ в @molecule@
         -- | Функция, задающая координаты атома @atom_B@ в единой СК
@@ -154,14 +154,14 @@ setAtomWithOutOptimization1 n zmatrix molecule =
         beta  = [Degree 0, Degree 5 .. Degree 175]
         allVariance = possibleCoord <$> alpha <*> beta
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
-    return $ Map.insert atomID_B goodVariance molecule
+    return $ Map.insert atomID_B goodVariance newMolecule
 
 -- | Функция предназначена для вставки
 -- второго атома молекулы из @zmatrix@ без процесса оптимизации.
 -- Вовзращает ВСЕ возможные варианты молекул со вставкой.
 -- Если таковых нет, то возвращается пустой список.
-setAtomWithOutOptimization2 :: Int -> ZMatrix -> Molecule -> [Molecule]
-setAtomWithOutOptimization2 n zmatrix molecule =
+setAtomWithOutOptimization2 :: Int -> ZMatrix -> Molecule -> Molecule -> [Molecule]
+setAtomWithOutOptimization2 n zmatrix originMol insMol =
     do
     let matrixAtom_C = zmatrix !! n
         atomID_C     = fromJust $ get atomid   matrixAtom_C
@@ -171,8 +171,8 @@ setAtomWithOutOptimization2 n zmatrix molecule =
         angle_ABC    = toDegree $ fromJust $ get bondangl matrixAtom_C
 
         atom_C  = get atom matrixAtom_C
-        atom_B  = fromMaybe (error "setSecondAtom: atom_B not found") $ molecule Map.!? atomID_B
-        atom_A  = fromMaybe (error "setSecondAtom: atom_A not found") $ molecule Map.!? atomID_A
+        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_B not found") $ originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
+        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_A not found") $ originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
         (x_B, y_B, z_B) = get coordin atom_B
@@ -187,22 +187,20 @@ setAtomWithOutOptimization2 n zmatrix molecule =
         r3 = (,,) (x_B - m * distance_BC) (y_B + m * distance_BC) (z_B - m * distance_BC)
         r4 = (,,) (x_B - m * distance_BC) (y_B - m * distance_BC) (z_B + m * distance_BC)
         ws = sortCoordinates [r1,r2,r3,r4]
-        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_B molecule
+        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_B originMol
 
         -- | Ищем углы трансляции. Система координат левая.
         -- Поэтому положительным углам соответствует вращение по часовой стрелке.
         -- b1 - угол поворота вокруг оси Z
         -- b2 - угол поворота вокруг оси Y
-        b1
-            | xy == 0   =  Degree 0
+        b1  | xy == 0   =  Degree 0
             | y'_B > 0  =  acosd (x'_B / xy)
             | otherwise = -acosd (x'_B / xy)
             where
                 xy = sqrt $ x'_B^2 + y'_B^2
                 (x'_B, y'_B) = (x_B - x_A, y_B - y_A)
 
-        b2
-            | z'_B < 0  =  acosd (xy / xyz)
+        b2  | z'_B < 0  =  acosd (xy / xyz)
             | otherwise = -acosd (xy / xyz)
             where
                 xy  = sqrt $ x'_B^2 + y'_B^2
@@ -224,14 +222,14 @@ setAtomWithOutOptimization2 n zmatrix molecule =
     let alpha = [Degree 0, Degree 2 .. Degree 358]
         allVariance  = possibleCoord <$> alpha
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
-    return $ Map.insert atomID_C goodVariance molecule
+    return $ Map.insert atomID_C goodVariance insMol
 
 -- | Функция предназначена для вставки
 -- третьего и всех последующих атомов молекулы из @zmatrix@ без процесса оптимизации.
 -- Вовзращает ОДИН возможный вариант молекулы со вставкой.
 -- Если такового нет, то возвращается пустой список.
-setAtomWithOutOptimization3 :: Int -> ZMatrix -> Molecule -> [Molecule]
-setAtomWithOutOptimization3 n zmatrix molecule =
+setAtomWithOutOptimization3 :: Int -> ZMatrix -> Molecule -> Molecule -> [Molecule]
+setAtomWithOutOptimization3 n zmatrix originMol insMol =
     do
     let matrixAtom_D = zmatrix !! n
         atomID_D     = fromJust $ get atomid   matrixAtom_D
@@ -243,9 +241,9 @@ setAtomWithOutOptimization3 n zmatrix molecule =
         angle_ABCD   = toDegree $ fromJust $ get dihedangl matrixAtom_D
 
         atom_D  = get atom matrixAtom_D
-        atom_C  = fromMaybe (error "setThirdAtom: atom_C not found") $ molecule Map.!? atomID_C
-        atom_B  = fromMaybe (error "setThirdAtom: atom_B not found") $ molecule Map.!? atomID_B
-        atom_A  = fromMaybe (error "setThirdAtom: atom_A not found") $ molecule Map.!? atomID_A
+        atom_C  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_C not found") $ originMol Map.!? atomID_C) $ insMol Map.!? atomID_C
+        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_B not found") $ originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
+        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_A not found") $ originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
         (x_B, y_B, z_B) = get coordin atom_B
@@ -262,7 +260,7 @@ setAtomWithOutOptimization3 n zmatrix molecule =
         r3 = (,,) (x_B - m * distance_CD) (y_B + m * distance_CD) (z_B - m * distance_CD)
         r4 = (,,) (x_B - m * distance_CD) (y_B - m * distance_CD) (z_B + m * distance_CD)
         ws = sortCoordinates [r1,r2,r3,r4]
-        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_C molecule
+        wsMolecule = Map.elems $ Map.filter (`isInWorkSpace` ws) $ Map.delete atomID_C originMol
 
         -- | Ищем углы трансляции. Система координат левая. Упорядоченная тройка (x,y,z).
         -- Поэтому положительным углам соответствует вращение по часовой стрелке.
@@ -311,7 +309,7 @@ setAtomWithOutOptimization3 n zmatrix molecule =
             in  (x_D, y_D, z_D) `seq` set coordin (x_D, y_D, z_D) atom_D
     let allVariance = pure possibleCoord
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
-    return $ Map.insert atomID_D possibleCoord molecule
+    return $ Map.insert atomID_D possibleCoord insMol
 
 -- | Функция предназначена для вставки
 -- третьего и всех последующих атомов молекулы из @zmatrix@ с процесом оптимизации.
@@ -385,7 +383,8 @@ setAtomWithOptimization3 n zmatrix molecule =
             in  set coordin (x_D, y_D, z_D) atom_D
     let molecule' = Map.insert atomID_D possibleCoord molecule
         (x_D, y_D, z_D) = get coordin possibleCoord
-        (r_D, m) = (get radius possibleCoord, 1)
+        r_D = get radius possibleCoord
+        m = 1
         r1 = (,,) (x_D - m * r_D) (y_D - m * r_D) (z_D - m * r_D)
         r2 = (,,) (x_D + m * r_D) (y_D - m * r_D) (z_D - m * r_D)
         r3 = (,,) (x_D - m * r_D) (y_D + m * r_D) (z_D - m * r_D)
@@ -394,20 +393,23 @@ setAtomWithOptimization3 n zmatrix molecule =
         wsMolecule     = Map.elems $ Map.filter (`isInWorkSpace` ws) molecule'
         atomsForOptim  = filter (isIntersection possibleCoord) wsMolecule
         resSeqForOptim = List.delete (get resseq possibleCoord) . List.nub $ map (get resseq) atomsForOptim
-    let ouf = "for_optimization"
-        inf = "optimizated_molecule"
+    let oufMol = "molecule_for_optimization"
+        oufSeq = "residue_for_optimization"
+        infMol = "optimizated_molecule"
         time_wait = 5000000
         wait False = return ()
         wait True  = do 
-            e <- doesFileExist inf 
+            e <- doesFileExist infMol 
             if e then wait False
             else threadDelay time_wait >> wait True
-    writeFile ouf $ unlines $ show <$> resSeqForOptim
+    writeMolecule oufMol molecule'
+    writeFile oufSeq $ unlines $ show <$> resSeqForOptim
     wait True
-    molecule <- readMolecule inf
-    removeFile ouf
-    removeFile inf
-    return molecule
+    molecule'' <- readMolecule infMol
+    removeFile oufMol
+    removeFile oufSeq
+    removeFile infMol
+    return molecule''
 
 -- | Функция сортирует координаты так, чтобы вектора
 -- r0r1, r0r2, r0r3 образовывали правую тройку.
@@ -501,7 +503,7 @@ readZMatrix inf = return $ zmatrix
                        resid     = read $ fields !! 9
                        atom      = Atom name resname resid coordin element radius]
 
-getRadius :: Element -> CompType
+getRadius :: Element -> CompAccur
 getRadius elem =
      case elem of "C" -> 1.100 -- // Заменено с 1.782
                   "H" -> 0.001 -- // Заменено с 0.200

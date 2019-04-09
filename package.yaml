@@ -39,11 +39,6 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -package fclabels-2.0.3.3
-    - -package strict
-    - -package mtl 
-    - -package deepseq
-    - -package ghc
     dependencies:
     - genetic-algorithm
 
