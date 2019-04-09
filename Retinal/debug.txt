@@ -1,34 +1,14 @@
-let mol = readMolecule "protein"
-let matr = readZMatrix  "z-matrix"
-let molecule = (setFirstAtom matr mol) !! 2
-let res = setSecondAtom matr molecule
-let f a = printf "ATOM   3370   CA REL U 212      %.3f  %.3f    %.3f  1.00  0.00      U    C\n" (get (x. coordin) a) (get (y.coordin) a) (get (z.coordin) a)
-mapM_ (f) res
-
-length . concat . map (setSecondAtom matr) $ molecule
-
-let matrixAtom_C = matr !! 2
-
-atomID_C     = fromJust $ get atomid   matrixAtom_C
-              atomID_B     = fromJust $ get atomcon  matrixAtom_C
-              atomID_A     = fromJust $ get anglcon  matrixAtom_C
-              distance_BC  = fromJust $ get bonddist matrixAtom_C
-              angle_CBA    = toDegree $ fromJust $ get bondangl matrixAtom_C
-
-              atom_C  = get atom matrixAtom_C
-              atom_B' = molecule Map.!? atomID_B
-              atom_A' = molecule Map.!? atomID_A
-              atom_B  = if isNothing atom_B' then error "setSecondAtom: atom_B not found" else fromJust atom_B'
-              atom_A  = if isNothing atom_A' then error "setSecondAtom: atom_A not found" else fromJust atom_A'
+:set +s
+mol = readMolecule "./Retinal/1M0L_protein.pdb"
+mat = readZMatrix "./Retinal/1M0L_retinal_zmatrix"
+x = setAtomWithoutOptimization 8 mat mol
+y = fromJust x
+writeMolecule "test" y
 
 
-
-a = Degree 75
-h     = distance_AC * sind (angle_BAC)
-                     x''_C = distance_AC * cosd (angle_BAC)
-                     z''_C = h * cosd (a)
-                     y''_C = h * sind (a)
-                     x_C   =  x''_C*cosd(b1)*cosd(b2) - y''_C*sind(b1) + z''_C*cosd(b1)*sind(b2) + x_A
-                     y_C   =  x''_C*sind(b1)*cosd(b2) + y''_C*cosd(b1) + z''_C*sind(b1)*sind(b2) + y_A
-                     z_C   = -x''_C*sind(b2)          + 0              + z''_C*cosd(b2)          + z_A
-set (z . coordin) z_C . set (y . coordin) y_C . set (x . coordin) x_C $ atom_C
+:set +s
+mol <- readMolecule "./Retinal/1M0L_protein.pdb"
+mat <- readZMatrix "./Retinal/1M0L_retinal_zmatrix"
+x = setAtomWithoutOptimization 8 mat mol
+y = fromJust x
+writeMolecule "test" y
