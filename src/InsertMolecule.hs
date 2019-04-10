@@ -101,7 +101,7 @@ setAtomWithOutOptimization n zmatr mol =
     listToMaybe $ setAtomWithOutOptimization' 1 n zmatr mol newMolecule
     where setAtomWithOutOptimization' m n zmatr originMol insMol
             | m > n     = pure $ Map.union originMol insMol
-            | m == 1    = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization1 1 zmatr mol
+            | m == 1    = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization1 1 zmatr mol insMol
             | m == 2    = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization2 2 zmatr mol insMol
             | otherwise = concat $! setAtomWithOutOptimization' (m+1) n zmatr originMol <$> setAtomWithOutOptimization3 m zmatr mol insMol
 
@@ -114,12 +114,12 @@ setAtomWithOptimization s e zmatr mol
     | otherwise = do mol' <- setAtomWithOptimization3 s zmatr mol
                      mol' `seq` setAtomWithOptimization (s+1) e zmatr mol'
 
-                     -- | Функция предназначена для вставки
+-- | Функция предназначена для вставки
 -- первого атома молекулы из @zmatrix@ без процесса оптимизации.
 -- Возвращает ВСЕ возможные варианты молекул со вставкой.
 -- Если таковых нет, то возвращается пустой список.
-setAtomWithOutOptimization1 :: Int -> ZMatrix -> Molecule -> [Molecule]
-setAtomWithOutOptimization1 n zmatrix originMol =
+setAtomWithOutOptimization1 :: Int -> ZMatrix -> Molecule -> Molecule -> [Molecule]
+setAtomWithOutOptimization1 n zmatrix originMol insMol =
     do
     let matrixAtom_B = zmatrix !! n
         atomID_B     = fromJust $ get atomid   matrixAtom_B
@@ -127,7 +127,8 @@ setAtomWithOutOptimization1 n zmatrix originMol =
         distance_AB  = fromJust $ get bonddist matrixAtom_B
 
         atom_B  = get atom matrixAtom_B
-        atom_A  = fromMaybe (error "setAtomWithOutOptimization1: atom_A not found") $ originMol Map.!? atomID_A
+        atom_A  = fromMaybe (error "setAtomWithOutOptimization1: atom_A not found") $ 
+                  originMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
 
@@ -154,7 +155,7 @@ setAtomWithOutOptimization1 n zmatrix originMol =
         beta  = [Degree 0, Degree 5 .. Degree 175]
         allVariance = possibleCoord <$> alpha <*> beta
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
-    return $ Map.insert atomID_B goodVariance newMolecule
+    return $ Map.insert atomID_B goodVariance insMol
 
 -- | Функция предназначена для вставки
 -- второго атома молекулы из @zmatrix@ без процесса оптимизации.
@@ -171,8 +172,10 @@ setAtomWithOutOptimization2 n zmatrix originMol insMol =
         angle_ABC    = toDegree $ fromJust $ get bondangl matrixAtom_C
 
         atom_C  = get atom matrixAtom_C
-        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_B not found") $ originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
-        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_A not found") $ originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
+        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_B not found") $
+                  originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
+        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization2: atom_A not found") $
+                  originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
         (x_B, y_B, z_B) = get coordin atom_B
@@ -219,7 +222,7 @@ setAtomWithOutOptimization2 n zmatrix originMol insMol =
                 y_C   =  x''_C*sind(b1)*cosd(b2) + y''_C*cosd(b1) + z''_C*sind(b1)*sind(b2) + y_A
                 z_C   = -x''_C*sind(b2)          + 0              + z''_C*cosd(b2)          + z_A
             in  (x_C, y_C, z_C) `seq` set coordin (x_C, y_C, z_C) atom_C
-    let alpha = [Degree 0, Degree 2 .. Degree 358]
+    let alpha = [Degree 0, Degree 1 .. Degree 359]
         allVariance  = possibleCoord <$> alpha
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
     return $ Map.insert atomID_C goodVariance insMol
@@ -241,9 +244,12 @@ setAtomWithOutOptimization3 n zmatrix originMol insMol =
         angle_ABCD   = toDegree $ fromJust $ get dihedangl matrixAtom_D
 
         atom_D  = get atom matrixAtom_D
-        atom_C  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_C not found") $ originMol Map.!? atomID_C) $ insMol Map.!? atomID_C
-        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_B not found") $ originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
-        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_A not found") $ originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
+        atom_C  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_C not found") $ 
+                  originMol Map.!? atomID_C) $ insMol Map.!? atomID_C
+        atom_B  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_B not found") $ 
+                  originMol Map.!? atomID_B) $ insMol Map.!? atomID_B
+        atom_A  = fromMaybe (fromMaybe (error "setAtomWithOutOptimization3: atom_A not found") $ 
+                  originMol Map.!? atomID_A) $ insMol Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
         (x_B, y_B, z_B) = get coordin atom_B
@@ -309,7 +315,7 @@ setAtomWithOutOptimization3 n zmatrix originMol insMol =
             in  (x_D, y_D, z_D) `seq` set coordin (x_D, y_D, z_D) atom_D
     let allVariance = pure possibleCoord
     goodVariance <- filter (\x -> not . or $ isIntersection <$> wsMolecule <*> pure x) allVariance
-    return $ Map.insert atomID_D possibleCoord insMol
+    return $ Map.insert atomID_D goodVariance insMol
 
 -- | Функция предназначена для вставки
 -- третьего и всех последующих атомов молекулы из @zmatrix@ с процесом оптимизации.
@@ -327,9 +333,12 @@ setAtomWithOptimization3 n zmatrix molecule =
         angle_ABCD   = toDegree $ fromJust $ get dihedangl matrixAtom_D
 
         atom_D  = get atom matrixAtom_D
-        atom_C  = fromMaybe (error "setAtomWithOptimization3: atom_C not found") $ molecule Map.!? atomID_C
-        atom_B  = fromMaybe (error "setAtomWithOptimization3: atom_B not found") $ molecule Map.!? atomID_B
-        atom_A  = fromMaybe (error "setAtomWithOptimization3: atom_A not found") $ molecule Map.!? atomID_A
+        atom_C  = fromMaybe (error "setAtomWithOptimization3: atom_C not found") $ 
+                  molecule Map.!? atomID_C
+        atom_B  = fromMaybe (error "setAtomWithOptimization3: atom_B not found") $ 
+                  molecule Map.!? atomID_B
+        atom_A  = fromMaybe (error "setAtomWithOptimization3: atom_A not found") $ 
+                  molecule Map.!? atomID_A
 
         (x_A, y_A, z_A) = get coordin atom_A
         (x_B, y_B, z_B) = get coordin atom_B

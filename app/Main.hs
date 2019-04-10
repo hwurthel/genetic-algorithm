@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns     #-}
+
 module Main where
 
 import StopCondition
@@ -17,17 +19,17 @@ insertMolecule = do
         n = read $ args !! 3
         s = read $ args !! 4
         e = read $ args !! 5
-        resname = args !! 6
-    zmatrix <- readZMatrix zmatr_name
-    molecule <- readMolecule mol_name
-    let moleculeM = setAtomWithOutOptimization n zmatrix molecule
-        molecule' = fromMaybe (error "insertMolecule: setAtomWithOutOptimization returned nothing") moleculeM
+        res_file = args !! 6
+    zmatrix    <- readZMatrix zmatr_name
+    molecule   <- readMolecule mol_name
+    let molecule' = fromMaybe (error "insertMolecule: returned Nothing") 
+                    $ setAtomWithOutOptimization n zmatrix molecule
     molecule'' <- setAtomWithOptimization s e zmatrix molecule'
-    writeMolecule resname molecule''
+    writeMolecule res_file molecule''
 
 geneticAlgorithm :: IO ()
 geneticAlgorithm = do
-    let evolution n sc (pop, all, best) = do
+    let evolution n sc (!pop, !all, !best) = do
         -- | Производим один шаг эволюции.
         -- Если это первая популяция, то только
         -- считаем параметры @pop_x@
