@@ -9,10 +9,9 @@ type Config = [(String, String)]
 config_file = "config"
 
 readConfig :: Config
-readConfig = 
-    [(key, val) | 
-    line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x /= "" ) $ lines s,
-    let (key, val) = (\x -> (head x, unwords $ drop 2 x)) $ words line]
+readConfig = [(key, val) | 
+                line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x /= "" ) $ lines s,
+                let (key, val) = (\x -> (head x, unwords $ drop 2 x)) $ words line]
     where s = unsafePerformIO $ readFile config_file 
 
 get :: String -> (String -> a) -> a
@@ -33,11 +32,11 @@ tmp_lambda :: Maybe Double
 tmp_lambda = get "tmp_lambda" read
 
 -- | Набор заменяемых аминокислот
-bros_list :: [(String, Int, Double, Double)]
+bros_list :: [([Char], Int, Double, Double)]
 bros_list = get "bros" readBros
     where readBros s = [(id a, read b, read c, read d) 
                         | p <- splitOn "," s, 
-                        let [a,b,c,d] = words p]
+                        let (a:b:c:d:[]) = words p]
 
 -- | Выходной файл
 out_file :: String

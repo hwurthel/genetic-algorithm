@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4feef4229710d6681e7a84cecd61715a54ecc182ca806004abd8e822db5689df
+-- hash: 0ebfce9fbc73e4d1d470664600d21bd3045e2da248522a27ffe4ad93f4338d2f
 
 name:           genetic-algorithm
 version:        0.1.0.0
@@ -28,6 +28,7 @@ library
   exposed-modules:
       Config
       Evolution
+      InputOutput
       InsertMolecule
       Protein
       StopCondition
