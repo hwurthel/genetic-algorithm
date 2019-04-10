@@ -3,12 +3,11 @@ module Main where
 import StopCondition
 import Evolution
 import Protein
-import InputOutput
 import InsertMolecule
 
 import System.Environment
-import Data.List
-import Data.Maybe
+import Data.List (sortOn)
+import Data.Maybe (fromMaybe)
 
 insertMolecule :: IO ()
 insertMolecule = do
@@ -39,7 +38,7 @@ geneticAlgorithm = do
             
             -- | Печатаем новую популяцию @pop_x'@ в @out_file@
             -- (определение @out_file@ смотри в модуле IO.hs)
-            writeInFile ("Step " <> show n <> "\n") pop'
+            writeInProteinFile ("Step " <> show n <> "\n") pop'
             
             -- | Дополняем множество всех особей @all_x@ 
             -- новой популяцией @pop_x'@
@@ -58,8 +57,8 @@ geneticAlgorithm = do
             if isStop sc' then return all'
             else evolution (n + 1) sc' (return pop', all', best')
     res <- evolution 1 0 (generatePopulation, [], tmpProtein)
-    writeInFile "--------------\n--------------\n" []
-    writeInFile "Result:\n" (reverse $ sortOn lambda res)
+    writeInProteinFile "--------------\n--------------\n" []
+    writeInProteinFile "Result:\n" (reverse $ sortOn lambda res)
     return ()
 
 main :: IO ()
