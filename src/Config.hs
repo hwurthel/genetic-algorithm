@@ -39,17 +39,17 @@ bros_list = get "bros" readBros
                         | p <- splitOn "," s, 
                         let [a,b,c,d] = words p]
 
--- | Выходной файл
-out_file :: String
-out_file = get "out_file" id 
+-- | Выходной файл, содержащий все белки
+result_file :: String
+result_file = get "result_file" id 
 
--- | Входной файл для обсчета параметров белка
-tmp_of :: String
-tmp_of = get "tmp_of" id 
+-- | Выходной файл (для обсчета параметров белка)
+compute_lambda_ouf :: String
+compute_lambda_ouf = get "compute_lambda_ouf" id 
 
 -- | Входной файл, где находятся обсчитанные параметры
-tmp_if :: String
-tmp_if = get "tmp_if" id
+compute_lambda_inf :: String
+compute_lambda_inf = get "compute_lambda_inf" id
 
 -- | Время задержки перед проверка файла @tmp_if@, в мкс
 time_wait :: Int
@@ -70,14 +70,3 @@ prob_cros = get "prob_cros" read
 -- | Вероятность того, что хромосома будет участвовать в мутации
 prob_mut :: Double
 prob_mut = get "prob_mut" read
-
--- | Файл для чтения белка после процесса оптимизации
-inf_mol :: String
-inf_mol = get "inf_mol" id
-
--- | Файл для вывода белка перед процессом оптимизации
-ouf_mol :: String
-ouf_mol = get "ouf_mol" id
-
-ouf_seq :: String
-ouf_seq = get "ouf_seq" id

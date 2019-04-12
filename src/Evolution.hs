@@ -9,17 +9,22 @@ module Evolution
     ) where
         
 import Protein
-import Config (eval_param, pop_size, 
-               prob_cros, prob_mut,)
-import Config (out_file, tmp_of, tmp_if,time_wait)
+import Config ( eval_param
+              , pop_size
+              , prob_cros
+              , prob_mut
+              , result_file
+              , compute_lambda_ouf
+              , compute_lambda_inf
+              , time_wait)
 
+import System.Directory (removeFile, doesFileExist, renameFile)
 import Control.Monad (replicateM)
 import System.Random (randomRIO)
-import System.IO
-import System.Directory (removeFile, doesFileExist)
-import Control.Concurrent
-import Data.List
 import Data.Maybe (fromJust)
+import Control.Concurrent
+import System.IO
+import Data.List
 
 -- | НАЧАЛО. ГЕНЕРАЦИЯ ПОПУЛЯЦИИ
 -- | Инициализатор популяции
@@ -134,7 +139,7 @@ sortPopulation p = reverse $ sortOn lambda p
 -- на втором - все оставшиеся. Первый параметр -- вероятность попасть в первую группу.
 selectProtein :: Double -> [Protein] ->  IO ([Protein], [Protein])
 selectProtein prob ps = do
-    ps' <- zip ps <$> (replicateM (length ps) $ randomRIO (0, 1 :: Double))
+    ps' <- zip ps <$> replicateM (length ps) (randomRIO (0, 1 :: Double))
     let (p1, p2) = partition (\x -> snd x < prob) ps'
     return (map fst p1, map fst p2)
 
@@ -159,22 +164,24 @@ computeLambda p ps = do
     print $ zip (map variance ps) (map lambda ps)
     print "----------------------------------------------\n"
 
-    withFile tmp_of WriteMode (writeProtein p_a)
+    (ou_tmp_name, ou_tmp_handle) <- openTempFile "." "temp"
+    mapM_ (hPutStrLn ou_tmp_handle . protein) ps
+    renameFile ou_tmp_name compute_lambda_ouf
     wait True
-    p_a' <- withFile tmp_if ReadMode (readProtein p_a)
-    removeFile tmp_of
-    removeFile tmp_if
+    in_handle <- openFile compute_lambda_inf ReadMode
+    p_a' <- mapM (\p' -> hGetLine in_handle >>= return . (\x -> p' { lambda = Just x}) . read) ps
+    removeFile compute_lambda_ouf
+    removeFile compute_lambda_inf
+
     return (p_a' <> p_b) 
     where 
-        writeProtein ps hdl = mapM_ (hPutStrLn hdl . protein) ps
-        readProtein  ps hdl = mapM (\p' -> hGetLine hdl >>= return . (\x -> p' { lambda = Just x }). read) ps
-        wait False = return () -- Рассмотреть функцию hWaitForInput
+        wait False = return ()
         wait True  = do 
-            e <- doesFileExist tmp_if 
+            e <- doesFileExist compute_lambda_inf 
             if e then wait False
             else threadDelay time_wait >> wait True
 
 writeInProteinFile :: String -> [Protein] -> IO [Protein]
-writeInProteinFile msg ps = withFile out_file AppendMode write >> return ps
-            where write = \hdl -> hPutStrLn hdl msg >> mapM_ (\p' -> hPrint hdl p') ps
+writeInProteinFile msg ps = withFile result_file AppendMode write >> return ps
+            where write hdl = hPutStrLn hdl msg >> mapM_ (hPrint hdl) ps
 -- | КОНЕЦ. ЧТЕНИЕ И ВЫВОД.

@@ -5,27 +5,10 @@ module Main where
 import StopCondition
 import Evolution
 import Protein
-import InsertMolecule
 
 import System.Environment
 import Data.List (sortOn)
 import Data.Maybe (fromMaybe)
-
-insertMolecule :: IO ()
-insertMolecule = do
-    args <- getArgs
-    let zmatr_name = args !! 1
-        mol_name   = args !! 2
-        n = read $ args !! 3
-        s = read $ args !! 4
-        e = read $ args !! 5
-        res_file = args !! 6
-    zmatrix    <- readZMatrix zmatr_name
-    molecule   <- readMolecule mol_name
-    let molecule' = fromMaybe (error "insertMolecule: returned Nothing") 
-                    $ setAtomWithOutOptimization n zmatrix molecule
-    molecule'' <- setAtomWithOptimization s e zmatrix molecule'
-    writeMolecule res_file molecule''
 
 geneticAlgorithm :: IO ()
 geneticAlgorithm = do
@@ -64,10 +47,4 @@ geneticAlgorithm = do
     return ()
 
 main :: IO ()
-main = do
-    args <- getArgs
-    let programm = args !! 0
-    case programm of
-        "insertMolecule"   -> insertMolecule
-        "geneticAlgorithm" -> geneticAlgorithm
-    return ()
+main = do geneticAlgorithm
