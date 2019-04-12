@@ -32,3 +32,10 @@ prob_cros = 0.5
 
 -- | Вероятность того, что хромосома будет участвовать в мутации
 prob_mut = 0.5
+
+-- | Файл для чтения белка после процесса оптимизации
+inf_mol = optimizated_molecule
+
+-- | Файл для вывода белка перед процессом оптимизации
+ouf_mol = molecule_for_optimization
+ouf_seq = residue_for_optimization

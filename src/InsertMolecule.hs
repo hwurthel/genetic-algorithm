@@ -26,6 +26,7 @@ import qualified Data.List as List
 import qualified System.IO.Strict as StrictIO
 
 import Utils
+import Config (inf_mol, ouf_mol, ouf_seq)
 
 -- | НАЧАЛО. ОПИСАНИЕ ТИПОВ.
 type CompAccur = Float
@@ -402,22 +403,19 @@ setAtomWithOptimization3 n zmatrix molecule =
         wsMolecule     = Map.elems $ Map.filter (`isInWorkSpace` ws) molecule'
         atomsForOptim  = filter (isIntersection possibleCoord) wsMolecule
         resSeqForOptim = List.delete (get resseq possibleCoord) . List.nub $ map (get resseq) atomsForOptim
-    let oufMol = "molecule_for_optimization"
-        oufSeq = "residue_for_optimization"
-        infMol = "optimizated_molecule"
-        time_wait = 5000000
+    let time_wait = 5000000
         wait False = return ()
         wait True  = do 
-            e <- doesFileExist infMol 
+            e <- doesFileExist inf_mol 
             if e then wait False
             else threadDelay time_wait >> wait True
-    writeMolecule oufMol molecule'
-    writeFile oufSeq $ unlines $ show <$> resSeqForOptim
+    writeMolecule ouf_mol molecule'
+    writeFile ouf_seq $ unlines $ show <$> resSeqForOptim
     wait True
-    molecule'' <- readMolecule infMol
-    removeFile oufMol
-    removeFile oufSeq
-    removeFile infMol
+    molecule'' <- readMolecule inf_mol
+    removeFile ouf_mol
+    removeFile ouf_seq
+    removeFile inf_mol
     return molecule''
 
 -- | Функция сортирует координаты так, чтобы вектора

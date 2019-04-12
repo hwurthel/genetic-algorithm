@@ -70,3 +70,14 @@ prob_cros = get "prob_cros" read
 -- | Вероятность того, что хромосома будет участвовать в мутации
 prob_mut :: Double
 prob_mut = get "prob_mut" read
+
+-- | Файл для чтения белка после процесса оптимизации
+inf_mol :: String
+inf_mol = get "inf_mol" id
+
+-- | Файл для вывода белка перед процессом оптимизации
+ouf_mol :: String
+ouf_mol = get "ouf_mol" id
+
+ouf_seq :: String
+ouf_seq = get "ouf_seq" id
