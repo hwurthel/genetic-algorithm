@@ -9,9 +9,10 @@ type Config = [(String, String)]
 config_file = "config"
 
 readConfig :: Config
-readConfig = [(key, val) | 
-                line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x /= "" ) $ lines s,
-                let (key, val) = (\x -> (head x, unwords $ drop 2 x)) $ words line]
+readConfig = 
+    [(key, val) | 
+    line <- filter (\x -> (not $ "--" `isPrefixOf` x) && x /= "" ) $ lines s,
+    let (key, val) = (\x -> (head x, unwords $ drop 2 x)) $ words line]
     where s = unsafePerformIO $ readFile config_file 
 
 get :: String -> (String -> a) -> a
@@ -32,23 +33,23 @@ tmp_lambda :: Maybe Double
 tmp_lambda = get "tmp_lambda" read
 
 -- | Набор заменяемых аминокислот
-bros_list :: [([Char], Int, Double, Double)]
+bros_list :: [(String, Int, Double, Double)]
 bros_list = get "bros" readBros
     where readBros s = [(id a, read b, read c, read d) 
                         | p <- splitOn "," s, 
-                        let (a:b:c:d:[]) = words p]
+                        let [a,b,c,d] = words p]
 
--- | Выходной файл
-out_file :: String
-out_file = get "out_file" id 
+-- | Выходной файл, содержащий все белки
+result_file :: String
+result_file = get "result_file" id 
 
--- | Входной файл для обсчета параметров белка
-tmp_of :: String
-tmp_of = get "tmp_of" id 
+-- | Выходной файл (для обсчета параметров белка)
+compute_lambda_ouf :: String
+compute_lambda_ouf = get "compute_lambda_ouf" id 
 
 -- | Входной файл, где находятся обсчитанные параметры
-tmp_if :: String
-tmp_if = get "tmp_if" id
+compute_lambda_inf :: String
+compute_lambda_inf = get "compute_lambda_inf" id
 
 -- | Время задержки перед проверка файла @tmp_if@, в мкс
 time_wait :: Int

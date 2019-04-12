@@ -9,14 +9,14 @@ tmp_variance = DTLWYPDA
 -- варианты аминокислот, позиция в белке, вероятность кроссовера, вероятность мутации
 bros = DAPQGSKTLVNWM 121 0.1 0.2, TCDGLNV 125 0.1 0.2, LKW 129 0.1 0.2, WM 222 0.1 0.2, YA 225 0.1 0.2, PIV 226 0.1 0.2, DET 253 0.1 0.2, AM 256 0.1 0.2
 
--- | Выходной файл
-out_file = result
+-- | Выходной файл, содержащий все белки
+result_file = result
 
 -- | Входной файл для обсчета параметров белка
-tmp_of  = tmp_of
+compute_lambda_ouf  = computing
 
 -- | Входной файл, где находятся обсчитанные параметры
-tmp_if = tmp_if
+compute_lambda_inf = computed
 
 -- | Время задержки перед проверка файла @tmp_if@, в мкс
 time_wait = 5000000
