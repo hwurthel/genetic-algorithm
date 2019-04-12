@@ -145,31 +145,33 @@ selectProtein prob ps = do
 
 -- | НАЧАЛО. ЧТЕНИЕ И ВЫВОД.
 computeLambda :: [Protein] -> [Protein] -> IO [Protein]
-computeLambda p ps = do
+computeLambda pop all = do
     -- |Реализовать алгоритм выбора белков @p_a@ и @p_b@
     -- можно иначе -- сначала найти @p_b@, а потом искать @p_a@
     -- как дополнение @p_b@ до @p@. Такая реализация
     -- окажется быстрее. СДЕЛАТЬ ПОТОМ
-    let p_a = [x | x <- p , x `notElem` ps]
-        p_b = map (\x -> x {lambda = lambda (inPs x)}) (p \\ p_a)
-              where inPs x = fromJust $ find (== x) ps 
+    let p_a = [x | x <- pop , x `notElem` all]
+        p_b = map (\x -> x {lambda = lambda (inPs x)}) (pop \\ p_a)
+              where inPs x = fromJust $ find (== x) all 
     
-    print "Current population\n"
-    print $ zip (map variance p) (map lambda p)     
-    print "\nWill be computed"
+    print "Current population"
+    print $ zip (map variance pop) (map lambda pop)     
+    print "Will be computed"
     print $ zip (map variance p_a) (map lambda p_a)
-    print "\nWon't be computed"
+    print "Won't be computed"
     print $ zip (map variance p_b) (map lambda p_b)
-    print "\nAll proteins"   
-    print $ zip (map variance ps) (map lambda ps)
-    print "----------------------------------------------\n"
+    print "All proteins"   
+    print $ zip (map variance all) (map lambda all)
+    print "----------------------------------------------"
 
-    (ou_tmp_name, ou_tmp_handle) <- openTempFile "." "temp"
-    mapM_ (hPutStrLn ou_tmp_handle . protein) ps
-    renameFile ou_tmp_name compute_lambda_ouf
+    (tmp_name_ouf, tmp_handle_ouf) <- openTempFile "." "temp"
+    mapM_ (hPutStrLn tmp_handle_ouf . protein) p_a
+    hClose tmp_handle_ouf
+    renameFile tmp_name_ouf compute_lambda_ouf
     wait True
-    in_handle <- openFile compute_lambda_inf ReadMode
-    p_a' <- mapM (\p' -> hGetLine in_handle >>= return . (\x -> p' { lambda = Just x}) . read) ps
+    handle_inf <- openFile compute_lambda_inf ReadMode
+    p_a' <- mapM (\p' -> hGetLine handle_inf >>= return . (\x -> p' { lambda = Just x}) . read) p_a
+    hClose handle_inf
     removeFile compute_lambda_ouf
     removeFile compute_lambda_inf
 
