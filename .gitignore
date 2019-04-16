@@ -1,7 +1,0 @@
-.stack-work
-.gitignore
-.gitattributes
-genetic-algorithm.cabal
-package.yaml
-undefined_code.hs
-Setup.hs
