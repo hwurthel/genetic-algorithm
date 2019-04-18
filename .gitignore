@@ -1,0 +1,6 @@
+.stack-work
+.gitattributes
+.DS_Store
+genetic-algorithm.cabal
+undefined_code.hs
+Setup.hs
