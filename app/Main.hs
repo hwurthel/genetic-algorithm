@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns     #-}
-
 module Main where
 
 import StopCondition
@@ -9,17 +7,18 @@ import Protein
 import System.Environment
 import Data.List (sortOn)
 import Data.Maybe (fromMaybe)
+import Data.Default
 
 geneticAlgorithm :: IO ()
 geneticAlgorithm = do
-    let evolution n sc (!pop, !all, !best) = do
+    let evolution n sc (pop, all, best) = do
         -- | Производим один шаг эволюции.
         -- Если это первая популяция, то только
         -- считаем параметры @pop_x@
             pop' <- 
                 if n == 1 
-                then pop >>= flip computeLambda all
-                else pop >>= selection >>= crossover >>= mutation >>= flip computeLambda all
+                 then pop >>= flip computeLambda all
+                 else pop >>= selection >>= crossover >>= mutation >>= flip computeLambda all
             
             -- | Печатаем новую популяцию @pop_x'@ в @out_file@
             -- (определение @out_file@ смотри в модуле IO.hs)
@@ -40,11 +39,11 @@ geneticAlgorithm = do
             -- В зависимости от результата возвращаем
             -- все особи @all_x'@ или продолжаем работу.
             if isStop sc' then return all'
-            else evolution (n + 1) sc' (return pop', all', best')
-    res <- evolution 1 0 (generatePopulation, [], tmpProtein)
+            else evolution (n + 1) sc' (return pop', all', best') 
+    res <- evolution 1 0 (generatePopulation, [], def)
     writeInProteinFile "--------------\n--------------\n" []
     writeInProteinFile "Result:\n" (reverse $ sortOn lambda res)
     return ()
 
 main :: IO ()
-main = do geneticAlgorithm
+main = geneticAlgorithm

@@ -10,16 +10,17 @@ fth4 (_,_,_,x) = x
 -- | НАЧАЛО. ПОДМОДУЛЬ "ТРИГОНОМЕТРИЯ"
 -- Предназчен для работы с тригонометрическими фукциями
 -- с градусами в аргументе
-newtype Degree a = Degree a deriving (Num, Enum, Show, Eq, Ord, Fractional)
+newtype Degree a = Degree a 
+    deriving (Num, Enum, Show, Eq, Ord, Fractional)
 
 toDegree :: Floating a => a -> Degree a
 toDegree = Degree
 
 rad2Deg :: Floating a => a -> Degree a
-rad2Deg = \x -> Degree (x * 180 / pi)
+rad2Deg x = Degree (x * 180 / pi)
 
 deg2Rad :: Floating a => Degree a -> a
-deg2Rad = \(Degree x) -> x * pi / 180
+deg2Rad (Degree x)= x * pi / 180
 
 cosd :: Floating a => Degree a -> a
 cosd = cos . deg2Rad 

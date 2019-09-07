@@ -9,14 +9,14 @@ module Evolution
     ) where
         
 import Protein
-import Config ( eval_param
-              , pop_size
-              , prob_cros
-              , prob_mut
-              , result_file
-              , compute_lambda_ouf
-              , compute_lambda_inf
-              , time_wait)
+import Config ( evalParam
+              , popSize
+              , probCros
+              , probMut
+              , resultFile
+              , computeLambdaOuf
+              , computeLambdaInf
+              , timeWait)
 
 import System.Directory (removeFile, doesFileExist, renameFile)
 import Control.Monad (replicateM)
@@ -25,6 +25,7 @@ import Data.Maybe (fromJust)
 import Control.Concurrent
 import System.IO
 import Data.List
+import Data.Default
 
 -- | НАЧАЛО. ГЕНЕРАЦИЯ ПОПУЛЯЦИИ
 -- | Инициализатор популяции
@@ -32,15 +33,15 @@ generatePopulation :: IO [Protein]
 generatePopulation =
     let generatePopulation' 0 = [] 
         generatePopulation' n = generateProtein : generatePopulation' (n-1)
-    in  sequence $ generatePopulation' pop_size
+    in  sequence $ generatePopulation' popSize
 
 -- | Инициализатор особи
 generateProtein :: IO Protein
 generateProtein = do
-    v <- mapM selectAminoacid bros_variance
-    return $ Protein { variance = v, 
-                       protein  = insertVariance $ zip v bros_position, 
-                       lambda   = Nothing}
+    v <- mapM selectAminoacid brosVariance
+    return $ def { variance = v, 
+                   protein  = insertVariance $ zip v brosPosition, 
+                   lambda   = Nothing}
 -- | КОНЕЦ. ГЕНЕРАЦИЯ ПОПУЛЯЦИИ
 
 -- | НАЧАЛО. КРОССИНГОВЕР
@@ -51,35 +52,36 @@ generateProtein = do
 crossover :: [Protein] -> IO [Protein]
 crossover [] = return []
 crossover ps = do
-     (for_cros, other) <- makeParentsPair <$> selectProtein prob_cros ps
-     crossed <- mapM crossover' for_cros
+     (forCros, other) <- makeParentsPair <$> selectProtein probCros ps
+     crossed <- mapM crossover' forCros
      return $ uncurry (<>) $ revMakeParentsPair (crossed, other)
 
 crossover' :: (Protein, Protein) -> IO (Protein, Protein)
 crossover' (p1, p2) = do
      let (v1, v2) = (variance p1, variance p2)
-     (v1', v2') <- crossover'' (v1, v2) bros_prob_cros
-     let p1' = Protein {variance = v1', protein = insertVariance $ zip v1' bros_position, lambda = Nothing }
-         p2' = Protein {variance = v2', protein = insertVariance $ zip v2' bros_position, lambda = Nothing }
+     (v1', v2') <- crossover'' (v1, v2) brosProbCros
+     let p1' = def {variance = v1', protein = insertVariance $ zip v1' brosPosition, lambda = Nothing }
+         p2' = def {variance = v2', protein = insertVariance $ zip v2' brosPosition, lambda = Nothing }
      return (p1', p2')
      where
         crossover'' ([], []) []  = return ([], [])
         crossover'' ((x:xs), (y:ys)) (a:as) = do
                 r <- randomRIO (0, 1 :: Double)
-                if r < a then pure ([y], [x]) <> crossover'' (xs, ys) as
-                         else pure ([x], [y]) <> crossover'' (xs, ys) as
+                if r < a 
+                 then pure ([y], [x]) <> crossover'' (xs, ys) as
+                 else pure ([x], [y]) <> crossover'' (xs, ys) as
                     
 -- | Образовываем родительские пары. Кому-то может не достаться особи. 
 -- Такая особь отправляется во вторую группу.
 makeParentsPair :: ([Protein], [Protein]) -> ([(Protein, Protein)], [Protein])
 makeParentsPair ([], a) = ([], a)
-makeParentsPair (y:[], a) = ([], y:a)
+makeParentsPair ([y], a) = ([], y:a)
 makeParentsPair (x:y:s, a) = ([(x,y)], []) <> makeParentsPair (s, a)
 
 -- | Операция, обратная makeParentsPair
 revMakeParentsPair :: ([(Protein, Protein)], [Protein]) -> ([Protein], [Protein])
 revMakeParentsPair ([]  , y) = ([], y)
-revMakeParentsPair ((x:xs), y) = ([fst x], []) <> ([snd x], []) <> revMakeParentsPair (xs, y)
+revMakeParentsPair (x:xs, y) = ([fst x], []) <> ([snd x], []) <> revMakeParentsPair (xs, y)
 -- | КОНЕЦ. КРОССИНГОВЕР
 
 -- | НАЧАЛО. МУТАЦИИ
@@ -91,20 +93,21 @@ revMakeParentsPair ((x:xs), y) = ([fst x], []) <> ([snd x], []) <> revMakeParent
 mutation :: [Protein] -> IO [Protein]
 mutation [] = return []
 mutation ps = do
-    (for_mutation, other) <- selectProtein prob_mut ps
-    mutated <- mapM mutation' for_mutation
+    (forMutation, other) <- selectProtein probMut ps
+    mutated <- mapM mutation' forMutation
     return $ mutated <> other
 
 mutation' :: Protein -> IO Protein
 mutation' p = do
-    v' <- mutation'' (variance p) bros_variance bros_prob_mut
-    return $ Protein {variance = v', protein = insertVariance $ zip v' bros_position, lambda = Nothing }
+    v' <- mutation'' (variance p) brosVariance brosProbMut
+    return $ Protein {variance = v', protein = insertVariance $ zip v' brosPosition, lambda = Nothing }
     where
         mutation'' [] [] [] = return [] 
         mutation'' (x:xs) (y:ys) (a:as) = do
             r <- randomRIO (0, 1 :: Double)
-            if r < a then sequence [selectAminoacid $ delete x y] <> mutation'' xs ys as
-                     else pure [x] <> mutation'' xs ys as
+            if r < a 
+             then sequence [selectAminoacid $ delete x y] <> mutation'' xs ys as
+             else pure [x] <> mutation'' xs ys as
 -- КОНЕЦ. МУТАЦИИ 
 
 -- | НАЧАЛО. СЕЛЕКЦИЯ
@@ -113,21 +116,19 @@ selection :: [Protein] -> IO [Protein]
 selection [] = return []
 selection p = selection' 0 (sortPopulation p) 
     where 
-        q = map (\n -> sum $ map eval [1..n]) [1..pop_size]
+        q = map (\n -> sum $ map eval [1..n]) [1..popSize]
         selectNum r (x:xs) = 1 + (if r > x then selectNum r xs else 0)
         selection' n p
-            | n == pop_size = return []
-            | otherwise = 
-                do
+            | n == popSize = return []
+            | otherwise = do
                     r <- randomRIO (0, last q)
-                    let i = selectNum r q
-                        x = p !! (i - 1)
+                    let x = p !! (selectNum r q - 1)
                     pure [x] <> selection' (n+1) p
 
 
 -- | Функция ранжирования
 eval :: Int -> Double
-eval n = eval_param*(1-eval_param)^(n-1)
+eval n = evalParam*(1-evalParam)^(n-1)
 
 -- | Ранжирование популяции от лучшей (на первом месте) к худшей
 sortPopulation :: [Protein] -> [Protein]
@@ -150,40 +151,40 @@ computeLambda pop all = do
     -- можно иначе -- сначала найти @p_b@, а потом искать @p_a@
     -- как дополнение @p_b@ до @p@. Такая реализация
     -- окажется быстрее. СДЕЛАТЬ ПОТОМ
-    let p_a = [x | x <- pop , x `notElem` all]
-        p_b = map (\x -> x {lambda = lambda (inPs x)}) (pop \\ p_a)
-              where inPs x = fromJust $ find (== x) all 
+    let pa = [x | x <- pop , x `notElem` all]
+        pb = map (\x -> x {lambda = lambda (inPs x)}) (pop \\ pa)
+         where inPs x = fromJust $ find (== x) all 
     
     print "Current population"
     print $ zip (map variance pop) (map lambda pop)     
     print "Will be computed"
-    print $ zip (map variance p_a) (map lambda p_a)
+    print $ zip (map variance pa) (map lambda pa)
     print "Won't be computed"
-    print $ zip (map variance p_b) (map lambda p_b)
+    print $ zip (map variance pb) (map lambda pb)
     print "All proteins"   
     print $ zip (map variance all) (map lambda all)
     print "----------------------------------------------"
 
-    (tmp_name_ouf, tmp_handle_ouf) <- openTempFile "." "temp"
-    mapM_ (hPutStrLn tmp_handle_ouf . protein) p_a
-    hClose tmp_handle_ouf
-    renameFile tmp_name_ouf compute_lambda_ouf
+    (tmpNameOuf, tmpHandleOuf) <- openTempFile "." "temp"
+    mapM_ (hPutStrLn tmpHandleOuf . protein) pa
+    hClose tmpHandleOuf
+    renameFile tmpNameOuf computeLambdaOuf
     wait True
-    handle_inf <- openFile compute_lambda_inf ReadMode
-    p_a' <- mapM (\p' -> hGetLine handle_inf >>= return . (\x -> p' { lambda = Just x}) . read) p_a
-    hClose handle_inf
-    removeFile compute_lambda_ouf
-    removeFile compute_lambda_inf
+    handleInf <- openFile computeLambdaInf ReadMode
+    pa' <- mapM (\p' -> hGetLine handleInf >>= return . (\x -> p' { lambda = Just x}) . read) pa
+    hClose handleInf
+    removeFile computeLambdaOuf
+    removeFile computeLambdaInf
 
-    return (p_a' <> p_b) 
+    return (pa' <> pb) 
     where 
         wait False = return ()
         wait True  = do 
-            e <- doesFileExist compute_lambda_inf 
+            e <- doesFileExist computeLambdaInf 
             if e then wait False
-            else threadDelay time_wait >> wait True
+            else threadDelay timeWait >> wait True
 
 writeInProteinFile :: String -> [Protein] -> IO [Protein]
-writeInProteinFile msg ps = withFile result_file AppendMode write >> return ps
+writeInProteinFile msg ps = withFile resultFile AppendMode write >> return ps
             where write hdl = hPutStrLn hdl msg >> mapM_ (hPrint hdl) ps
 -- | КОНЕЦ. ЧТЕНИЕ И ВЫВОД.

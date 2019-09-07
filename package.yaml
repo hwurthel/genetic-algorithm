@@ -27,6 +27,7 @@ dependencies:
 - deepseq
 - strict
 - fclabels
+- data-default
 
 library:
   source-dirs: src

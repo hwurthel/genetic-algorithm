@@ -3,8 +3,9 @@ module Protein where
 
 import Data.List
 import Utils
-import Config (tmp_protein, tmp_lambda, tmp_variance, bros_list)
+import Config (tmpProtein, tmpLambda, tmpVariance, brosList)
 import System.Random
+import Data.Default
 
 type Aminoacid = Char
 data Protein = Protein { protein   :: [Aminoacid]
@@ -30,24 +31,24 @@ instance Show Protein where
              "\n"
 
 -- | Шаблонный белок
-tmpProtein :: Protein
-tmpProtein = Protein { 
-    variance = tmp_variance,
-    protein  = tmp_protein,
-    lambda   = tmp_lambda
-    }
+instance Default Protein where
+    def = Protein { 
+        variance = tmpVariance,
+        protein  = tmpProtein,
+        lambda   = tmpLambda
+        }
 
 -- | Пары, определяющие, в каком месте белка и на какую аминокислоту
 -- мы можем произвести замену
-bros_variance  = fst4 $ unzip4 bros_list
-bros_position  = snd4 $ unzip4 bros_list
-bros_prob_cros = trd4 $ unzip4 bros_list
-bros_prob_mut  = fth4 $ unzip4 bros_list
+brosVariance = fst4 $ unzip4 brosList
+brosPosition = snd4 $ unzip4 brosList
+brosProbCros = trd4 $ unzip4 brosList
+brosProbMut  = fth4 $ unzip4 brosList
 
 -- | Вставка изменяемых аминокислот в шаблонный белок
 -- с целью получить вид полученного белка  
 insertVariance :: [(Aminoacid, Int)] -> [Aminoacid]
-insertVariance x = foldl insert (protein tmpProtein) x
+insertVariance = foldl insert (protein def)
     where insert p (a, n) = take (n-1) p <> [a] <> drop n p
 
 -- | Взятие случайной аминокислоты из набора доступных
