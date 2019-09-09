@@ -169,7 +169,7 @@ computeLambda pop all = do
     mapM_ (hPutStrLn tmpHandleOuf . protein) pa
     hClose tmpHandleOuf
     renameFile tmpNameOuf computeLambdaOuf
-    wait True
+    wait
     handleInf <- openFile computeLambdaInf ReadMode
     pa' <- mapM (\p' -> hGetLine handleInf >>= return . (\x -> p' { lambda = Just x}) . read) pa
     hClose handleInf
@@ -178,11 +178,11 @@ computeLambda pop all = do
 
     return (pa' <> pb) 
     where 
-        wait False = return ()
-        wait True  = do 
+        wait = do 
             e <- doesFileExist computeLambdaInf 
-            if e then wait False
-            else threadDelay timeWait >> wait True
+            if e 
+             then return ()
+             else threadDelay timeWait >> wait
 
 writeInProteinFile :: String -> [Protein] -> IO [Protein]
 writeInProteinFile msg ps = withFile resultFile AppendMode write >> return ps
